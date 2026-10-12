@@ -146,9 +146,9 @@ export default css`
   .horizon-card-tile {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 5px;
     min-width: 0;
-    padding: 6px 10px;
+    padding: 6px 7px;
     border: 1px solid var(--hc-tile-border-color, var(--divider-color, rgba(127, 127, 127, 0.25)));
     border-radius: var(--hc-tile-border-radius, 8px);
     background: var(--hc-tile-background, transparent);
@@ -157,15 +157,15 @@ export default css`
   .horizon-card-tile-icon {
     flex: none;
     display: block;
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
   }
 
   .horizon-card-tile-name {
     flex: 1;
     min-width: 0;
     color: var(--hc-field-name-color, var(--hc-secondary));
-    font-size: 0.85em;
+    font-size: 0.8em;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

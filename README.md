@@ -1,33 +1,92 @@
-[![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://hacs.xyz/docs/faq/custom_repositories/)
+[![release](https://img.shields.io/github/v/release/sygad/lovelace-horizon-card?style=for-the-badge)](https://github.com/sygad/lovelace-horizon-card/releases)
 
+# Horizon Card: tiles edition
 
-# Lovelace Horizon Card (tiles fork)
+A fork of [rejuvenate/lovelace-horizon-card](https://github.com/rejuvenate/lovelace-horizon-card) that replaces the plain text under the graph with **tiles**, and **switches them to the Moon at night**.
 
-> **This is a personal fork of [rejuvenate/lovelace-horizon-card](https://github.com/rejuvenate/lovelace-horizon-card).**
-> It shows the fields under the graph as tiles, and can swap them to Moon data at night.
-> Everything else works the same as upstream.
->
-> | Option | Default | Description |
-> | --- | --- | --- |
-> | `tiles` | `true` | Show the fields under the graph as two rows of tiles. Set to `false` for the classic layout. |
-> | `night_swap` | `true` | With tiles, from sunset to sunrise show Moon data (moonrise, illumination, moonset, then Moon azimuth, phase and elevation) and draw the Moon on the graph. |
-> | `fields.day_length` | `true` | Tile with the time from sunrise to sunset (middle of the second day row). |
-> | `fields.moon_illumination` | `true` | Tile with how much of the Moon is lit (middle of the first night row). |
->
-> The night tiles respect `fields.moonrise`, `moonset`, `moon_phase`, `moon_azimuth` and `moon_elevation`, so turn those on to fill them.
-> A hidden field leaves its slot empty so the columns stay aligned. Tile colours can be themed with
-> `--hc-tile-border-color`, `--hc-tile-background`, `--hc-tile-border-radius`, `--hc-tile-gap`, `--hc-tile-icon-color`,
-> `--hc-tile-icon-track-color`, `--hc-tile-twilight-color`, `--hc-tile-sun-color` and `--hc-tile-moon-color`.
->
-> This fork registers the same `custom:horizon-card` element, so remove the upstream card before installing it.
+| By day | By night |
+| :---: | :---: |
+| ![Tiles by day, light theme](https://raw.githubusercontent.com/sygad/lovelace-horizon-card/main/images/tiles-day-light.png) | ![Tiles by night, light theme](https://raw.githubusercontent.com/sygad/lovelace-horizon-card/main/images/tiles-night-light.png) |
+| ![Tiles by day, dark theme](https://raw.githubusercontent.com/sygad/lovelace-horizon-card/main/images/tiles-day-dark.png) | ![Tiles by night, dark theme](https://raw.githubusercontent.com/sygad/lovelace-horizon-card/main/images/tiles-night-dark.png) |
 
-A [Home Assistant Dashboard Card](https://www.home-assistant.io/dashboards/) available through the [Home Assistant Community Store](https://hacs.xyz) and inspired by Google Weather (pre 2024 version).
+## What's different from the original
 
-Lovelace Horizon Card is a fork of the original [home-assistant-sun-card](https://github.com/AitorDB/home-assistant-sun-card) project by [@AitorDB](https://github.com/AitorDB) to continue the great work and distribute the responsibility of supporting and advancing the project among a team of people.
+| Original card | This fork |
+| :---: | :---: |
+| ![Original footer](https://raw.githubusercontent.com/sygad/lovelace-horizon-card/main/images/classic-day-light.png) | ![Tile footer](https://raw.githubusercontent.com/sygad/lovelace-horizon-card/main/images/tiles-day-light.png) |
 
-Consider joining us! Click [here to fork](https://github.com/rejuvenate/lovelace-horizon-card/fork)
+- **Tiles instead of centred text.** Each field sits in its own tile with an icon, a label and a right-aligned value, in a fixed three-column grid.
+- **No empty gap.** The middle of the second row shows the length of daylight (sunrise to sunset), which the original card doesn't show.
+- **Day/night swap.** From sunset to sunrise the tiles switch to the Moon:
 
-## Introduction
+  | Row | Day (sunrise to sunset) | Night (sunset to sunrise) |
+  | --- | --- | --- |
+  | 1 | Dawn · Solar noon · Dusk | Moonrise · Illumination · Moonset |
+  | 2 | Sun azimuth · Daylight · Sun elevation | Moon azimuth · Moon phase · Moon elevation |
+
+  At night the Moon is also drawn on the graph, even with `moon: false`. The graph always keeps room for it, so the card stays the same height at sunset and sunrise.
+- **Same height as the original.** Two rows of tiles, whatever the time of day.
+- **Narrow cards.** On a narrow card the tile labels are hidden, and on very narrow cards the icons are hidden too.
+
+Everything else (the graph, the header, the languages and the visual editor) works as in the original.
+
+## Install with HACS
+
+1. If the original Horizon Card is installed, remove it in HACS first. Both register `custom:horizon-card`, so only one can be installed.
+2. In HACS, open the menu → **Custom repositories**, add `https://github.com/sygad/lovelace-horizon-card` with type **Dashboard**.
+3. Download **Horizon Card (tiles fork)**, then refresh your browser.
+
+Existing `custom:horizon-card` configs keep working without changes.
+
+## Options added by this fork
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `tiles` | `true` | Show the fields as tiles. `false` brings back the original layout. |
+| `night_swap` | `true` | With tiles, show Moon data from sunset to sunrise and draw the Moon on the graph. |
+| `fields.day_length` | `true` | Daylight tile (middle of the second day row). |
+| `fields.moon_illumination` | `true` | Moon illumination tile (middle of the first night row). |
+
+The night tiles follow the existing Moon fields (`moonrise`, `moonset`, `moon_phase`, `moon_azimuth`, `moon_elevation`), which are off by default, so turn them on:
+
+```yaml
+type: custom:horizon-card
+fields:
+  sun_azimuth: true
+  sun_elevation: true
+  moonrise: true
+  moonset: true
+  moon_phase: true
+  moon_azimuth: true
+  moon_elevation: true
+```
+
+A hidden field leaves its tile slot empty, so the columns stay aligned.
+
+### Tile styling
+
+These CSS variables can be set in a theme or with card-mod:
+
+| Variable | Default |
+| --- | --- |
+| `--hc-tile-border-color` | `var(--divider-color)` |
+| `--hc-tile-background` | `transparent` |
+| `--hc-tile-border-radius` | `8px` |
+| `--hc-tile-gap` | `8px` |
+| `--hc-tile-icon-color` | primary text colour |
+| `--hc-tile-icon-track-color` | `var(--secondary-background-color)` |
+| `--hc-tile-twilight-color` | `#f5a54a` (dawn and dusk icons) |
+| `--hc-tile-sun-color` | `#f9d65c` (solar noon and daylight icons) |
+| `--hc-tile-moon-color` | `hsl(42, 47%, 82%)` (Moon icons) |
+
+---
+
+## Original documentation
+
+Everything below is the original card's documentation and applies to this fork as well.
+
+### Introduction
 
 The Horizon Card tracks the position of the Sun and the Moon over the horizon and shows the times of various Sun and Moon events, as well as their current azimuth and elevation, in a visually appealing and easy-to-read format.
 
