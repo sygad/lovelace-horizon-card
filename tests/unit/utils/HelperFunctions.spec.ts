@@ -99,6 +99,28 @@ describe('HelperFunctions', () => {
     })
   })
 
+  describe('isDaytime', () => {
+    const times = (now: string) => ({
+      now: new Date(now),
+      sunrise: new Date('2026-10-12T06:34:00Z'),
+      sunset: new Date('2026-10-12T17:25:00Z')
+    })
+
+    it('is day between sunrise and sunset', () => {
+      expect(HelperFunctions.isDaytime({ elevation: 20, times: times('2026-10-12T09:30:00Z') } as any)).toBe(true)
+    })
+
+    it('is night after sunset and before sunrise', () => {
+      expect(HelperFunctions.isDaytime({ elevation: -20, times: times('2026-10-12T20:45:00Z') } as any)).toBe(false)
+      expect(HelperFunctions.isDaytime({ elevation: -20, times: times('2026-10-12T03:15:00Z') } as any)).toBe(false)
+    })
+
+    it('falls back to the elevation without sunrise and sunset', () => {
+      expect(HelperFunctions.isDaytime({ elevation: 5, times: { now: new Date(0) } } as any)).toBe(true)
+      expect(HelperFunctions.isDaytime({ elevation: -5, times: { now: new Date(0) } } as any)).toBe(false)
+    })
+  })
+
   describe('clamp', () => {
     it('returns the correct value when min and max have the same value', () => {
       const result = HelperFunctions.clamp(50, 50, 20)

@@ -130,6 +130,129 @@ export default css`
     margin: 1em 0;
   }
 
+  /* Tile footer (see HorizonCardTiles). The card is a size container so the tile names can be
+     dropped when the card is too narrow for them. */
+  .horizon-card {
+    container-type: inline-size;
+  }
+
+  .horizon-card-tiles {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--hc-tile-gap, 8px);
+    margin: 0 0.25em 0.5em;
+  }
+
+  .horizon-card-tile {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    padding: 6px 10px;
+    border: 1px solid var(--hc-tile-border-color, var(--divider-color, rgba(127, 127, 127, 0.25)));
+    border-radius: var(--hc-tile-border-radius, 8px);
+    background: var(--hc-tile-background, transparent);
+  }
+
+  .horizon-card-tile-icon {
+    flex: none;
+    display: block;
+    width: 24px;
+    height: 24px;
+  }
+
+  .horizon-card-tile-name {
+    flex: 1;
+    min-width: 0;
+    color: var(--hc-field-name-color, var(--hc-secondary));
+    font-size: 0.85em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .horizon-card-tile-value {
+    color: var(--hc-field-value-color, var(--hc-primary));
+    font-weight: 500;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .horizon-card-tile-moon_phase .horizon-card-tile-value {
+    flex: 1;
+    min-width: 0;
+    font-weight: 400;
+    font-size: 0.9em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  @container (max-width: 380px) {
+    .horizon-card-tile-name {
+      display: none;
+    }
+
+    .horizon-card-tile {
+      justify-content: space-between;
+    }
+  }
+
+  @container (max-width: 300px) {
+    .horizon-card-tile-icon {
+      display: none;
+    }
+
+    .horizon-card-tile {
+      justify-content: center;
+      padding: 6px 4px;
+    }
+
+    .horizon-card-tile-value {
+      font-size: 0.9em;
+    }
+  }
+
+  .horizon-card-tile-icon .hc-icon-track {
+    fill: var(--hc-tile-icon-track-color, var(--secondary-background-color, #ececee));
+  }
+
+  .horizon-card-tile-icon .hc-icon-dawn,
+  .horizon-card-tile-icon .hc-icon-dusk {
+    fill: var(--hc-tile-twilight-color, #f5a54a);
+  }
+
+  .horizon-card-tile-icon .hc-icon-noon {
+    fill: var(--hc-tile-sun-color, #f9d65c);
+  }
+
+  .horizon-card-tile-icon .hc-icon-line {
+    fill: none;
+    stroke: var(--hc-tile-icon-color, var(--hc-primary));
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .horizon-card-tile-icon .hc-icon-dot {
+    fill: var(--hc-tile-icon-color, var(--hc-primary));
+  }
+
+  /* The tile icons use the Moon's full colour: the graph's Moon is dimmed when it is below the
+     horizon, which would make a small icon unreadable. */
+  .horizon-card-tile-icon .hc-icon-moon {
+    fill: var(--hc-tile-moon-color, hsl(42, 47%, 82%));
+    stroke: var(--hc-tile-icon-color, var(--hc-primary));
+    stroke-width: 1;
+  }
+
+  .horizon-card-tile-icon .hc-icon-moon-lit {
+    fill: var(--hc-tile-moon-color, hsl(42, 47%, 82%));
+  }
+
+  .horizon-card-tile-icon .hc-icon-moon-dark {
+    fill: var(--hc-moon-shadow-color, var(--_hc-moon-shadow-color));
+  }
+
   /* The SVG scales to the container width; its height follows the viewBox aspect ratio, so the
      balanced-frame crop (which changes the viewBox height) changes the rendered card height. */
   .horizon-card-graph svg {

@@ -20,11 +20,12 @@ export const HORIZON_CARD_EDITOR_TAG = 'horizon-card-editor'
 const FIELD_DEFAULTS: Record<string, boolean> = {
   sunrise: true, sunset: true, dawn: true, noon: true, dusk: true,
   sun_azimuth: false, moon_azimuth: false, sun_elevation: false, moon_elevation: false,
-  moonrise: false, moonset: false, moon_phase: false
+  moonrise: false, moonset: false, moon_phase: false,
+  day_length: true, moon_illumination: true
 }
 
 // Top-level booleans that default to true (so the editor omits them from the written config when on).
-const DEFAULT_TRUE_BOOLEANS = ['sun', 'moon', 'graph', 'sunrise_sunset_lines']
+const DEFAULT_TRUE_BOOLEANS = ['sun', 'moon', 'graph', 'sunrise_sunset_lines', 'tiles', 'night_swap']
 
 @customElement(HORIZON_CARD_EDITOR_TAG)
 export class HorizonCardEditor extends LitElement {
@@ -183,6 +184,8 @@ export class HorizonCardEditor extends LitElement {
       moon: config.moon ?? true,
       graph: config.graph ?? true,
       sunrise_sunset_lines: config.sunrise_sunset_lines ?? true,
+      tiles: config.tiles ?? true,
+      night_swap: config.night_swap ?? true,
 
       field_sunrise: fieldValue('sunrise'),
       field_sunset: fieldValue('sunset'),
@@ -196,6 +199,8 @@ export class HorizonCardEditor extends LitElement {
       field_moonrise: fieldValue('moonrise'),
       field_moonset: fieldValue('moonset'),
       field_moon_phase: fieldValue('moon_phase'),
+      field_day_length: fieldValue('day_length'),
+      field_moon_illumination: fieldValue('moon_illumination'),
 
       refresh_period: config.refresh_period,
       southern_flip: config.southern_flip === undefined ? 'auto' : (config.southern_flip ? 'on' : 'off'),

@@ -18,6 +18,10 @@ export type THorizonCardFields = {
   moonrise?: boolean,
   moonset?: boolean,
   moon_phase?: boolean
+
+  // Tile footer only
+  day_length?: boolean
+  moon_illumination?: boolean
 }
 
 export interface IHorizonCardConfig extends LovelaceCardConfig {
@@ -30,6 +34,10 @@ export interface IHorizonCardConfig extends LovelaceCardConfig {
   sun?: boolean,
   sunrise_sunset_lines?: boolean,
   graph?: boolean,
+  // Render the footer as tiles instead of the classic centred text rows
+  tiles?: boolean,
+  // With tiles: between sunset and sunrise, show Moon data instead of Sun data (and draw the Moon)
+  night_swap?: boolean,
   time_format?: TimeFormat
   number_format?: NumberFormat
 
@@ -144,7 +152,9 @@ export enum EHorizonCardI18NKeys {
   Sunrise = 'sunrise',
   Sunset = 'sunset',
   Moonrise = 'moonrise',
-  Moonset = 'moonset'
+  Moonset = 'moonset',
+  DayLength = 'day_length',
+  MoonIllumination = 'moon_illumination'
 }
 
 export type THorizonCardI18NErrorKeys = {

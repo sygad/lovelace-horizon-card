@@ -8,13 +8,15 @@ import { TemplateResultTestHelper } from '../../../helpers/TestHelpers'
 jest.mock('../../../../src/components/horizonCard/HorizonCardHeader', () => require('../../../mocks/HorizonCardHeader'))
 jest.mock('../../../../src/components/horizonCard/HorizonCardGraph', () => require('../../../mocks/HorizonCardGraph'))
 jest.mock('../../../../src/components/horizonCard/HorizonCardFooter', () => require('../../../mocks/HorizonCardFooter'))
+jest.mock('../../../../src/components/horizonCard/HorizonCardTiles', () => require('../../../mocks/HorizonCardTiles'))
 
 describe('HorizonCardContent', () => {
   describe('render', () => {
     it('renders the card content', async () => {
       const config: IHorizonCardConfig = {
         type: 'horizon-card',
-        language: 'en'
+        language: 'en',
+        tiles: false
       }
 
       const i18n = new I18N('en', 'UTC', TimeFormat.language, NumberFormat.language)
@@ -29,7 +31,8 @@ describe('HorizonCardContent', () => {
       const config: IHorizonCardConfig = {
         type: 'horizon-card',
         language: 'en',
-        graph: false
+        graph: false,
+        tiles: false
       }
 
       const i18n = new I18N('en', 'UTC', TimeFormat.language, NumberFormat.language)
@@ -38,6 +41,21 @@ describe('HorizonCardContent', () => {
       const html = await TemplateResultTestHelper.renderElement(horizonCardContent)
 
       expect(html).toMatchSnapshot()
+    })
+
+    it('renders the tile footer by default', async () => {
+      const config: IHorizonCardConfig = {
+        type: 'horizon-card',
+        language: 'en'
+      }
+
+      const i18n = new I18N('en', 'UTC', TimeFormat.language, NumberFormat.language)
+      const horizonCardContent = new HorizonCardContent(config, {} as THorizonCardData, i18n)
+
+      const html = await TemplateResultTestHelper.renderElement(horizonCardContent)
+
+      expect(html).toContain('HORIZON CARD TILES')
+      expect(html).not.toContain('HORIZON CARD FOOTER')
     })
   })
 })

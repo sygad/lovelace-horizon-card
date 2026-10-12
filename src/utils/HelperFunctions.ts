@@ -2,7 +2,7 @@ import type { TemplateResult } from 'lit'
 import { html, nothing } from 'lit'
 
 import { Constants } from '../constants'
-import type { TMoonPhase } from '../types'
+import type { TMoonPhase, TSunData } from '../types'
 import { EHorizonCardI18NKeys } from '../types'
 import type { I18N } from './I18N'
 
@@ -51,7 +51,7 @@ export class HelperFunctions {
     return html`<div class="horizon-card-field-value ${klass}">${mappedValue}</div>`
   }
 
-  private static fieldValueToString (i18n: I18N, translationKey: string, value: FieldValue) {
+  public static fieldValueToString (i18n: I18N, translationKey: string, value: FieldValue) {
     let pre = ''
     let post = ''
     if (value === undefined) {
@@ -74,6 +74,16 @@ export class HelperFunctions {
     const postHtml = post ? html`<span class="horizon-card-field-value-secondary">${post}</span>` : nothing
 
     return html`${preHtml}${value}${postHtml}`
+  }
+
+  // Daytime is between sunrise and sunset. Without both times (polar day or night) fall back to
+  // whether the Sun is above the horizon.
+  public static isDaytime (sunData: TSunData): boolean {
+    const { now, sunrise, sunset } = sunData.times
+    if (sunrise !== undefined && sunset !== undefined) {
+      return now >= sunrise && now < sunset
+    }
+    return sunData.elevation > 0
   }
 
   public static isValidLanguage (language: string): boolean {

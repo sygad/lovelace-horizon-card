@@ -39,6 +39,8 @@ export class Constants {
     sun: true,
     sunrise_sunset_lines: true,
     graph: true,
+    tiles: true,
+    night_swap: true,
     debug_level: 0,
     refresh_period: Constants.DEFAULT_REFRESH_PERIOD,
     fields: {
@@ -51,7 +53,9 @@ export class Constants {
       elevation: false,
       moonrise: false,
       moonset: false,
-      moon_phase: false
+      moon_phase: false,
+      day_length: true,
+      moon_illumination: true
     }
     // These keys must not be in the default config as they are provided by Home Assistant:
     // language, dark_mode, latitude, longitude, elevation, time_zone.

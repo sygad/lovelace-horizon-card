@@ -1,7 +1,25 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
 
 
-# Lovelace Horizon Card
+# Lovelace Horizon Card (tiles fork)
+
+> **This is a personal fork of [rejuvenate/lovelace-horizon-card](https://github.com/rejuvenate/lovelace-horizon-card).**
+> It shows the fields under the graph as tiles, and can swap them to Moon data at night.
+> Everything else works the same as upstream.
+>
+> | Option | Default | Description |
+> | --- | --- | --- |
+> | `tiles` | `true` | Show the fields under the graph as two rows of tiles. Set to `false` for the classic layout. |
+> | `night_swap` | `true` | With tiles, from sunset to sunrise show Moon data (moonrise, illumination, moonset, then Moon azimuth, phase and elevation) and draw the Moon on the graph. |
+> | `fields.day_length` | `true` | Tile with the time from sunrise to sunset (middle of the second day row). |
+> | `fields.moon_illumination` | `true` | Tile with how much of the Moon is lit (middle of the first night row). |
+>
+> The night tiles respect `fields.moonrise`, `moonset`, `moon_phase`, `moon_azimuth` and `moon_elevation`, so turn those on to fill them.
+> A hidden field leaves its slot empty so the columns stay aligned. Tile colours can be themed with
+> `--hc-tile-border-color`, `--hc-tile-background`, `--hc-tile-border-radius`, `--hc-tile-gap`, `--hc-tile-icon-color`,
+> `--hc-tile-icon-track-color`, `--hc-tile-twilight-color`, `--hc-tile-sun-color` and `--hc-tile-moon-color`.
+>
+> This fork registers the same `custom:horizon-card` element, so remove the upstream card before installing it.
 
 A [Home Assistant Dashboard Card](https://www.home-assistant.io/dashboards/) available through the [Home Assistant Community Store](https://hacs.xyz) and inspired by Google Weather (pre 2024 version).
 

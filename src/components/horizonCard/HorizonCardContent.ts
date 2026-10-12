@@ -6,6 +6,7 @@ import type { I18N } from '../../utils/I18N'
 import { HorizonCardFooter } from './HorizonCardFooter'
 import { HorizonCardGraph } from './HorizonCardGraph'
 import { HorizonCardHeader } from './HorizonCardHeader'
+import { HorizonCardTiles } from './HorizonCardTiles'
 
 export class HorizonCardContent {
   private config: IHorizonCardConfig
@@ -54,6 +55,9 @@ export class HorizonCardContent {
   }
 
   private renderFooter (): TemplateResult | typeof nothing {
+    if (this.config.tiles !== false) {
+      return new HorizonCardTiles(this.config, this.data, this.i18n).render()
+    }
     return new HorizonCardFooter(this.config, this.data, this.i18n).render()
   }
 }

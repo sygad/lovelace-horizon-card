@@ -116,6 +116,17 @@ export class HorizonCard extends LitElement {
       height += 1
     }
 
+    if ((this.config.tiles ?? Constants.DEFAULT_CONFIG.tiles) !== false) {
+      // Tiles: at most two rows, whichever of the day or night sets is larger
+      const dayRows = [fieldConfig.dawn || fieldConfig.noon || fieldConfig.dusk,
+        fieldConfig.sun_azimuth || fieldConfig.day_length || fieldConfig.sun_elevation].filter(Boolean).length
+      const nightRows = !this.nightSwap() ? 0 : [fieldConfig.moonrise || fieldConfig.moon_illumination || fieldConfig.moonset,
+        fieldConfig.moon_azimuth || fieldConfig.moon_phase || fieldConfig.moon_elevation].filter(Boolean).length
+      height += Math.max(dayRows, nightRows)
+      this.debug(() => `getCardSize() => ${height}`, 2)
+      return height
+    }
+
     if (fieldConfig.dawn || fieldConfig.noon || fieldConfig.dusk) {
       height += 1
     }
@@ -583,7 +594,9 @@ export class HorizonCard extends LitElement {
       return Constants.DEFAULT_CARD_DATA.graphFrame
     }
     const sunShown = (this.config?.sun ?? Constants.DEFAULT_CONFIG.sun) !== false
-    const moonShown = (this.config?.moon ?? Constants.DEFAULT_CONFIG.moon) !== false
+    // With the night swap the Moon is drawn at night, so always reserve room for it: the card
+    // then keeps the same height at sunset and sunrise.
+    const moonShown = (this.config?.moon ?? Constants.DEFAULT_CONFIG.moon) !== false || this.nightSwap()
 
     let min = 0
     let max = 0
@@ -631,6 +644,12 @@ export class HorizonCard extends LitElement {
     return this.config.longitude !== undefined && this.config.time_zone === undefined
   }
 
+  private nightSwap (): boolean {
+    const tiles = this.config?.tiles ?? Constants.DEFAULT_CONFIG.tiles
+    const nightSwap = this.config?.night_swap ?? Constants.DEFAULT_CONFIG.night_swap
+    return tiles !== false && nightSwap !== false
+  }
+
   private now (): Date {
     return this.config.now !== undefined ? new Date(this.config.now) : new Date()
   }
@@ -650,7 +669,8 @@ export class HorizonCard extends LitElement {
         sunrise: false, sunset: false, dawn: false, noon: false, dusk: false,
         azimuth: false, sun_azimuth: false, moon_azimuth: false,
         elevation: false, sun_elevation: false, moon_elevation: false,
-        moonrise: false, moonset: false, moon_phase: false
+        moonrise: false, moonset: false, moon_phase: false,
+        day_length: false, moon_illumination: false
       }
     }
 
@@ -688,6 +708,11 @@ export class HorizonCard extends LitElement {
 
     // The default value is the current time
     config.now = this.now()
+
+    // The night swap shows Moon data at night, so draw the Moon then too
+    if (this.nightSwap() && !HelperFunctions.isDaytime(this.data.sunData)) {
+      config.moon = true
+    }
 
     return config
   }

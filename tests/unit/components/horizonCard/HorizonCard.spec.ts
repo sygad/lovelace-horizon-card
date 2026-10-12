@@ -568,9 +568,21 @@ describe('HorizonCard', () => {
       expect(expandedCongfig['moon']).toEqual(true)
     })
 
+    it('draws the Moon at night when the night swap is on', () => {
+      horizonCard.setConfig({ moon: false } as IHorizonCardConfig)
+      horizonCard.hass = SaneHomeAssistant
+      horizonCard['data'] = {
+        ...horizonCard['data'],
+        sunData: { ...horizonCard['data'].sunData, elevation: -20, times: { now: new Date(0) } as any }
+      }
+
+      expect(horizonCard['expandedConfig']()['moon']).toEqual(true)
+    })
+
     it('uses user provided values for non-field config', () => {
       horizonCard.setConfig({
-        moon: false
+        moon: false,
+        night_swap: false
       } as IHorizonCardConfig)
       horizonCard.hass = SaneHomeAssistant
 
@@ -644,9 +656,16 @@ describe('HorizonCard', () => {
   })
 
   describe('getCardSize', () => {
+    it('counts at most two tile rows', () => {
+      horizonCard.setConfig({ fields: { sun_azimuth: true, sun_elevation: true, moonrise: true } } as IHorizonCardConfig)
+
+      // 4 (graph) + 1 (sunrise/sunset) + 2 (tile rows)
+      expect(horizonCard.getCardSize()).toEqual(7)
+    })
+
     // Note: don't set hass for these tests, getCardSize() is called after setConfig() but before hass is set
     it('compute size for default fields', () => {
-      horizonCard.setConfig({} as IHorizonCardConfig)
+      horizonCard.setConfig({tiles: false} as IHorizonCardConfig)
 
       expect(horizonCard.getCardSize()).toEqual(6)
     })
@@ -656,7 +675,7 @@ describe('HorizonCard', () => {
       it(`compute size when field ${field} is added`, () => {
         const fields = {}
         fields[field] = true
-        horizonCard.setConfig({fields} as IHorizonCardConfig)
+        horizonCard.setConfig({tiles: false, fields} as IHorizonCardConfig)
 
         expect(horizonCard.getCardSize()).toEqual(7)
       })
@@ -667,7 +686,7 @@ describe('HorizonCard', () => {
       for (const field of azimuthElevationFields) {
         fields[field] = true
       }
-      horizonCard.setConfig({fields} as IHorizonCardConfig)
+      horizonCard.setConfig({tiles: false, fields} as IHorizonCardConfig)
 
       expect(horizonCard.getCardSize()).toEqual(7)
     })
@@ -677,7 +696,7 @@ describe('HorizonCard', () => {
       it(`compute size when field ${field} is added`, () => {
         const fields = {}
         fields[field] = true
-        horizonCard.setConfig({fields} as IHorizonCardConfig)
+        horizonCard.setConfig({tiles: false, fields} as IHorizonCardConfig)
 
         expect(horizonCard.getCardSize()).toEqual(7)
       })
@@ -688,7 +707,7 @@ describe('HorizonCard', () => {
       for (const field of moonriseMoonsetFields) {
         fields[field] = true
       }
-      horizonCard.setConfig({fields} as IHorizonCardConfig)
+      horizonCard.setConfig({tiles: false, fields} as IHorizonCardConfig)
 
       expect(horizonCard.getCardSize()).toEqual(7)
     })
@@ -701,13 +720,14 @@ describe('HorizonCard', () => {
       for (const field of moonriseMoonsetFields) {
         fields[field] = true
       }
-      horizonCard.setConfig({fields} as IHorizonCardConfig)
+      horizonCard.setConfig({tiles: false, fields} as IHorizonCardConfig)
 
       expect(horizonCard.getCardSize()).toEqual(8)
     })
 
     it(`compute size when sunrise and sunset fields are removed`, () => {
       horizonCard.setConfig({
+        tiles: false,
         fields: {
           sunrise: false,
           sunset: false
@@ -719,6 +739,7 @@ describe('HorizonCard', () => {
 
     it(`compute size when sunrise field is removed`, () => {
       horizonCard.setConfig({
+        tiles: false,
         fields: {
           sunrise: false
         }
@@ -729,6 +750,7 @@ describe('HorizonCard', () => {
 
     it(`compute size when sunset field is removed`, () => {
       horizonCard.setConfig({
+        tiles: false,
         fields: {
           sunset: false
         }
@@ -739,6 +761,7 @@ describe('HorizonCard', () => {
 
     it(`compute size when dusk, noon and dawn fields are removed`, () => {
       horizonCard.setConfig({
+        tiles: false,
         fields: {
           dusk: false,
           noon: false,
@@ -751,6 +774,7 @@ describe('HorizonCard', () => {
 
     it(`compute size when dusk field is removed`, () => {
       horizonCard.setConfig({
+        tiles: false,
         fields: {
           dusk: false
         }
@@ -761,6 +785,7 @@ describe('HorizonCard', () => {
 
     it(`compute size when noon field is removed`, () => {
       horizonCard.setConfig({
+        tiles: false,
         fields: {
           noon: false
         }
@@ -771,6 +796,7 @@ describe('HorizonCard', () => {
 
     it(`compute size when dawn field is removed`, () => {
       horizonCard.setConfig({
+        tiles: false,
         fields: {
           dawn: false
         }
@@ -781,6 +807,7 @@ describe('HorizonCard', () => {
 
     it(`compute size when all default fields are removed`, () => {
       horizonCard.setConfig({
+        tiles: false,
         fields: {
           sunrise: false,
           sunset: false,
@@ -795,6 +822,7 @@ describe('HorizonCard', () => {
 
     it(`compute size when a title is set`, () => {
       horizonCard.setConfig({
+        tiles: false,
         title: 'Fancy Card'
       } as IHorizonCardConfig)
 
@@ -1387,7 +1415,7 @@ describe('HorizonCard', () => {
     })
 
     it('skips the moon extremes and fits the sun alone when the moon is hidden', () => {
-      horizonCard.setConfig({ moon: false } as IHorizonCardConfig)
+      horizonCard.setConfig({ moon: false, night_swap: false } as IHorizonCardConfig)
       const frame = (horizonCard as any)['computeGraphFrame'](1, 0)
       expect((horizonCard as any)['computeMoonElevationExtremes']).not.toHaveBeenCalled()
       // Sun-only fit: top = curve top 20 - radius 17 - padding 2; bottom = curve base 146.
