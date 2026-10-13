@@ -60,6 +60,17 @@ export class HorizonCard extends LitElement {
 
   private lastComputeTimestamp = 0
 
+  // Extra sky (viewBox units) added above the graph so it fills a card taller than its content.
+  private fillExtra = 0
+
+  private readonly resizeObserver = typeof ResizeObserver === 'undefined'
+    ? undefined
+    : new ResizeObserver(() => {
+      if (this.data && !this.data.partial) {
+        this.fitGraphToCard()
+      }
+    })
+
   private readonly onVisibilityChange = () => {
     if (!this.config) {
       return
@@ -220,6 +231,8 @@ export class HorizonCard extends LitElement {
     } else if (this.data.partial) {
       this.calculateStateFinal()
       this.scheduleRefresh()
+    } else {
+      this.fitGraphToCard()
     }
   }
 
@@ -230,6 +243,7 @@ export class HorizonCard extends LitElement {
     this.hasCalculated = false
     this.requestUpdate()
     document.addEventListener('visibilitychange', this.onVisibilityChange)
+    this.resizeObserver?.observe(this)
     this.debug('connectedCallback()', 2)
   }
 
@@ -237,6 +251,7 @@ export class HorizonCard extends LitElement {
     super.disconnectedCallback()
     window.clearTimeout(this.refreshTimer)
     document.removeEventListener('visibilitychange', this.onVisibilityChange)
+    this.resizeObserver?.disconnect()
     this.debug('disconnectedCallback()', 2)
   }
 
@@ -610,7 +625,38 @@ export class HorizonCard extends LitElement {
     }
 
     const overrides = this.cropOverrides()
-    return this.graphFrameFor(sunShown, moonShown, scaleY, offsetY, min, max, overrides.above, overrides.below)
+    const frame = this.graphFrameFor(sunShown, moonShown, scaleY, offsetY, min, max, overrides.above, overrides.below)
+    return { top: frame.top - this.fillExtra, height: frame.height + this.fillExtra }
+  }
+
+  // When the card is given more height than its content needs (a fixed number of rows in a Sections
+  // view, or a height set with card-mod), the footer is pinned to the bottom (see cardStyles) and the
+  // graph takes up the free space as extra sky above the Sun path. A card sized to its content has
+  // no free space, so it is unchanged. Converges in one pass: the next measurement finds ~0 free.
+  private fitGraphToCard (): void {
+    const graph = this.shadowRoot?.querySelector('.horizon-card-graph')
+    const width = graph?.querySelector('svg')?.getBoundingClientRect().width ?? 0
+    if (!(graph instanceof HTMLElement) || width <= 0) {
+      return
+    }
+    const graphBottom = graph.getBoundingClientRect().bottom + parseFloat(getComputedStyle(graph).marginBottom)
+    const next = graph.nextElementSibling
+    const content = graph.parentElement
+    let limit: number
+    if (next) {
+      limit = next.getBoundingClientRect().top
+    } else if (content) {
+      limit = content.getBoundingClientRect().bottom - parseFloat(getComputedStyle(content).paddingBottom)
+    } else {
+      return
+    }
+    const fill = Math.max(0, this.fillExtra + (limit - graphBottom) * Constants.GRAPH_WIDTH / width)
+    if (Math.abs(fill - this.fillExtra) < 0.5) {
+      return
+    }
+    this.debug(() => `fitGraphToCard() => ${fill}`, 2)
+    this.fillExtra = fill
+    this.data = { ...this.data, graphFrame: this.computeGraphFrame(this.data.sunPosition.scaleY, this.data.sunPosition.offsetY) }
   }
 
   private latitude (): number {

@@ -382,6 +382,8 @@ By default the graph crops its height to fit the Sun and Moon, so there are no l
 
 Set a number to pin one or both sides (for example `--hc-graph-above-horizon: 55`). To turn the fitting off and keep the classic fixed frame, set `--hc-graph-above-horizon: 84` and `--hc-graph-below-horizon: 66`.
 
+When the card is given more height than its content needs, for example a fixed number of rows in a Sections view (`grid_options: rows: 6`), the tiles or fields are pinned to the bottom of the card and the graph grows to fill the free space, as extra sky above the arc. A card sized to its content is unaffected.
+
 **Common recipes**
 
 A few tweaks that come up often. Colours are `--hc-*` variables, so they work in a theme or in Uix/card-mod. Anything that is not a colour (text case, font size, line thickness) is an ordinary CSS property, so it needs Uix or card-mod rather than a theme.

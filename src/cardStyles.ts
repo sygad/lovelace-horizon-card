@@ -52,6 +52,33 @@ export default css`
     --_hc-moon-outline-color: #6b7789;
   }
 
+  /* Fill the height the dashboard gives the card (e.g. fixed rows in a Sections view): the footer
+     is pinned to the bottom and the graph grows into the free space (HorizonCard.fitGraphToCard).
+     A card sized to its content is unaffected. */
+  :host {
+    display: block;
+    height: 100%;
+  }
+
+  ha-card {
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .horizon-card.card-content {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Two classes so it wins over the footers' own margin shorthands below. */
+  .horizon-card-graph + .horizon-card-tiles,
+  .horizon-card-graph + .horizon-card-footer {
+    margin-top: auto;
+  }
+
   .horizon-card {
     padding: 0.5em;
     font-family: var(--primary-font-family);
