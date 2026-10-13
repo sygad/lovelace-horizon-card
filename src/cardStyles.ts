@@ -67,8 +67,11 @@ export default css`
     flex-direction: column;
   }
 
+  /* min-height: 0 keeps the content at the height the card gives it even when that is less than
+     it needs, so fitGraphToCard sees the overflow and shrinks the graph back. */
   .horizon-card.card-content {
     flex: 1 1 auto;
+    min-height: 0;
     display: flex;
     flex-direction: column;
   }

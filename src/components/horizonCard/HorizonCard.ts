@@ -71,6 +71,8 @@ export class HorizonCard extends LitElement {
       }
     })
 
+  private observedContent?: HTMLElement
+
   private readonly onVisibilityChange = () => {
     if (!this.config) {
       return
@@ -243,7 +245,6 @@ export class HorizonCard extends LitElement {
     this.hasCalculated = false
     this.requestUpdate()
     document.addEventListener('visibilitychange', this.onVisibilityChange)
-    this.resizeObserver?.observe(this)
     this.debug('connectedCallback()', 2)
   }
 
@@ -252,6 +253,7 @@ export class HorizonCard extends LitElement {
     window.clearTimeout(this.refreshTimer)
     document.removeEventListener('visibilitychange', this.onVisibilityChange)
     this.resizeObserver?.disconnect()
+    this.observedContent = undefined
     this.debug('disconnectedCallback()', 2)
   }
 
@@ -634,23 +636,33 @@ export class HorizonCard extends LitElement {
   // graph takes up the free space as extra sky above the Sun path. A card sized to its content has
   // no free space, so it is unchanged. Converges in one pass: the next measurement finds ~0 free.
   private fitGraphToCard (): void {
-    const graph = this.shadowRoot?.querySelector('.horizon-card-graph')
+    const content = this.shadowRoot?.querySelector('.horizon-card.card-content')
+    if (!(content instanceof HTMLElement)) {
+      return
+    }
+    // The content box is the height the card gives it (min-height: 0), so the observer fires when
+    // either the host or the ha-card itself (card-mod) is resized.
+    if (content !== this.observedContent) {
+      if (this.observedContent) {
+        this.resizeObserver?.unobserve(this.observedContent)
+      }
+      this.observedContent = content
+      this.resizeObserver?.observe(content)
+    }
+    const graph = content.querySelector('.horizon-card-graph')
+    const last = content.lastElementChild
     const width = graph?.querySelector('svg')?.getBoundingClientRect().width ?? 0
-    if (!(graph instanceof HTMLElement) || width <= 0) {
+    if (!graph || !last || width <= 0) {
       return
     }
+    // Free space = the footer's auto top margin (the gap past the graph's own margin) plus anything
+    // below the last child, which goes negative when a shrunken card makes the content overflow.
     const graphBottom = graph.getBoundingClientRect().bottom + parseFloat(getComputedStyle(graph).marginBottom)
-    const next = graph.nextElementSibling
-    const content = graph.parentElement
-    let limit: number
-    if (next) {
-      limit = next.getBoundingClientRect().top
-    } else if (content) {
-      limit = content.getBoundingClientRect().bottom - parseFloat(getComputedStyle(content).paddingBottom)
-    } else {
-      return
-    }
-    const fill = Math.max(0, this.fillExtra + (limit - graphBottom) * Constants.GRAPH_WIDTH / width)
+    const autoGap = graph.nextElementSibling ? graph.nextElementSibling.getBoundingClientRect().top - graphBottom : 0
+    const limit = content.getBoundingClientRect().bottom - parseFloat(getComputedStyle(content).paddingBottom)
+    const lastBottom = last.getBoundingClientRect().bottom + parseFloat(getComputedStyle(last).marginBottom)
+    const free = autoGap + limit - lastBottom
+    const fill = Math.max(0, this.fillExtra + free * Constants.GRAPH_WIDTH / width)
     if (Math.abs(fill - this.fillExtra) < 0.5) {
       return
     }
