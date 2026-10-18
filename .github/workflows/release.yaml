@@ -38,14 +38,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Releasing the same tag twice would silently replace an existing release, so stop early.
+      # Releasing an existing tag would silently replace that release and its attached card, so
+      # stop early. matching-refs answers with an empty list rather than an error when the tag is
+      # free, so a failing API call aborts the job instead of being read as "the tag is new".
       - name: Make sure the tag is new
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ inputs.version }}
         run: |
-          if gh release view "$VERSION" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            echo "::error::Release $VERSION already exists. Pick a new version number."
+          set -euo pipefail
+          refs=$(gh api "repos/$GITHUB_REPOSITORY/git/matching-refs/tags/$VERSION" --jq '.[].ref')
+          if grep -Fxq "refs/tags/$VERSION" <<< "$refs"; then
+            echo "::error::Tag $VERSION already exists. Pick a new version number."
             exit 1
           fi
 
