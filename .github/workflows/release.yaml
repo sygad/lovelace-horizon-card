@@ -1,20 +1,53 @@
 name: Build & Release
 
+# Ship a stable version to HACS. Run this by hand: Actions tab -> "Build & Release" ->
+# "Run workflow" -> type the version tag -> green button. The workflow lints, tests and
+# builds the card, stamps the version into the bundle and attaches
+# dist/lovelace-horizon-card.js to a new GitHub release. HACS installs that attached file
+# (see hacs.json), so the release is the only thing users ever download.
+#
+# Nothing is released by a plain push to main; pushes only run the checks in
+# build-and-test.yaml. For a beta that only opt-in users see, use prerelease.yaml instead.
+
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag to release, e.g. v2.0.1 or v2.0.0-tiles.4'
+        required: true
+        type: string
+
+permissions:
+  contents: write
 
 jobs:
   build-and-release:
     name: Build & Release
     runs-on: ubuntu-latest
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
+      - name: Validate the version tag
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z][0-9A-Za-z.-]*)?$ ]]; then
+            echo "::error::'$VERSION' is not a valid version tag."
+            echo "::error::Use a 'v' prefix and X.Y.Z, optionally with a suffix: v2.0.1 or v2.0.0-tiles.4."
+            exit 1
+          fi
+
       - name: Checkout
-        uses: actions/checkout@master
+        uses: actions/checkout@v4
+
+      # Releasing the same tag twice would silently replace an existing release, so stop early.
+      - name: Make sure the tag is new
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          if gh release view "$VERSION" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "::error::Release $VERSION already exists. Pick a new version number."
+            exit 1
+          fi
 
       - name: Enable Corepack
         run: corepack enable
@@ -37,28 +70,30 @@ jobs:
       - name: Build
         run: yarn build
 
-      - uses: rymndhng/release-on-push-action@master
-        id: release
-        with:
-          bump_version_scheme: norelease
-          use_github_release_notes: true
-
-      - name: Log Release Version
-        run: |
-          echo "Created tag name: ${{ steps.release.outputs.tag_name }}"
-          echo "Created release version: ${{ steps.release.outputs.version }}"
-
-      # The bundle carries a __HORIZON_CARD_VERSION__ placeholder (see src/index.ts). The version is
-      # only known here, after the release action computed the tag, so stamp it in before uploading.
+      # The bundle carries a __HORIZON_CARD_VERSION__ placeholder (see src/index.ts); the card logs
+      # this version in the browser console. Replace it with the tag being released.
       - name: Stamp the release version into the bundle
-        if: ${{ steps.release.outputs.version != '' }}
-        run: sed -i "s|__HORIZON_CARD_VERSION__|${{ steps.release.outputs.tag_name }}|g" dist/lovelace-horizon-card.js
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          sed -i "s|__HORIZON_CARD_VERSION__|$VERSION|g" dist/lovelace-horizon-card.js
+          if grep -q '__HORIZON_CARD_VERSION__' dist/lovelace-horizon-card.js; then
+            echo "::error::The version placeholder is still in the bundle."
+            exit 1
+          fi
+          if ! grep -q "$VERSION" dist/lovelace-horizon-card.js; then
+            echo "::error::$VERSION was not stamped into the bundle."
+            exit 1
+          fi
 
-      - name: Upload JS card file to release
-        if: ${{ steps.release.outputs.version != '' }}
-        uses: svenstaro/upload-release-action@v2
+      - name: Create the release and attach the card
+        uses: softprops/action-gh-release@v2
         with:
-          overwrite: true
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ steps.release.outputs.version }}
-          file: dist/lovelace-horizon-card.js
+          tag_name: ${{ inputs.version }}
+          target_commitish: ${{ github.sha }}
+          name: ${{ inputs.version }}
+          prerelease: false
+          make_latest: true
+          generate_release_notes: true
+          files: dist/lovelace-horizon-card.js
+          fail_on_unmatched_files: true

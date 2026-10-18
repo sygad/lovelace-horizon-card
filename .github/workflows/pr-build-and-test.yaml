@@ -1,18 +1,25 @@
-name: Pull Request Build & Test
+name: Build & Test
+
+# The project's checks: lint, unit tests and a production build of the card. Runs on every
+# pull request and on every push to main, so main is always known to be green. This never
+# publishes anything - releases are cut by hand from release.yaml (see RELEASING.md).
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
   workflow_dispatch:
 
 jobs:
   build-and-test:
-    name: PR Build & Test
+    name: Build & Test
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout
-        uses: actions/checkout@master
+        uses: actions/checkout@v4
 
       - name: Enable Corepack
         run: corepack enable

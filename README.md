@@ -502,6 +502,10 @@ Every drawn element has a stable class, all of them listed in [`tests/manual/sty
 
 Run `yarn build`
 
+### Releases
+
+Releases are built on GitHub, not locally: run the **Build & Release** workflow from the Actions tab and give it the version tag. It lints, tests and builds the card, stamps the version in and attaches `lovelace-horizon-card.js` to a new release, which is what HACS downloads. Step-by-step instructions are in [RELEASING.md](RELEASING.md).
+
 ### Pre-releases (beta)
 
-Stable releases are cut by merging to `main` with a `release:*` label. To ship a beta instead, run the **Build & Pre-release (beta)** workflow (Actions tab) from the branch you want, with a semver pre-release tag such as `v2.0.0-beta.1`. It publishes a pre-release, so only HACS users who enable **Show beta versions** on the repository are offered it, and it does not affect the next stable version number.
+To ship a beta instead, run the **Build & Pre-release (beta)** workflow (Actions tab) from the branch you want, with a semver pre-release tag such as `v2.0.0-beta.1`. It publishes a pre-release, so only HACS users who enable **Show beta versions** on the repository are offered it, and it does not affect the stable release users get.

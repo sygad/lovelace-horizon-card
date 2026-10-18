@@ -5,11 +5,9 @@ name: Build & Pre-release (beta)
 # the way a normal release does (see #215). Run this manually from the branch
 # you want to ship and give it a semver pre-release tag such as v2.0.0-beta.1.
 #
-# This is intentionally decoupled from the stable release flow (release.yaml):
-# it never runs on push, you choose the exact version yourself, and the release
-# is flagged as a pre-release. The stable auto-release reads GitHub's "latest
-# release" endpoint, which skips pre-releases, so betas never affect how the
-# next stable version number is computed.
+# This works just like the stable release flow (release.yaml) except that the
+# release is flagged as a pre-release, so it is never the repository's "latest"
+# release and cannot disturb the version normal HACS users are offered.
 
 on:
   workflow_dispatch:
@@ -34,7 +32,7 @@ jobs:
           if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-[0-9A-Za-z][0-9A-Za-z.-]*$ ]]; then
             echo "::error::'$VERSION' is not a semver pre-release tag."
             echo "::error::Use a 'v' prefix, X.Y.Z and a '-<identifier>' suffix, e.g. v2.0.0-beta.1."
-            echo "::error::For a normal (stable) release, merge to main with a release:* label instead."
+            echo "::error::For a normal (stable) release, run the 'Build & Release' workflow instead."
             exit 1
           fi
 
