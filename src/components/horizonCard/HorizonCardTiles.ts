@@ -8,10 +8,11 @@ import type { I18N } from '../../utils/I18N'
 
 type TSlot = TemplateResult | typeof nothing
 
-// Tile footer: two rows of three tiles. During the day the tiles show Sun data
-// (dawn / solar noon / dusk, then azimuth / day length / elevation). With `night_swap`, between
-// sunset and sunrise they show Moon data instead (moonrise / illumination / moonset, then
-// azimuth / phase / elevation). A disabled field leaves its slot empty so the columns stay aligned.
+// Tile footer: rows of three tiles. The first row (sunrise / lux / sunset) is shown day and night.
+// During the day the other rows show Sun data (dawn / solar noon / dusk, then azimuth / day length /
+// elevation). With `night_swap`, between sunset and sunrise they show Moon data instead (moonrise /
+// illumination / moonset, then azimuth / phase / elevation). A disabled field leaves its slot empty
+// so the columns stay aligned; a row with every field disabled is dropped.
 export class HorizonCardTiles {
   private readonly data: THorizonCardData
   private readonly i18n: I18N
@@ -28,7 +29,7 @@ export class HorizonCardTiles {
   }
 
   public render (): TemplateResult | typeof nothing {
-    const rows = this.night ? this.nightRows() : this.dayRows()
+    const rows = [this.sunTimesRow(), ...(this.night ? this.nightRows() : this.dayRows())]
     const visible = rows.filter((row) => row.some((slot) => slot !== nothing))
     if (visible.length === 0) {
       return nothing
@@ -41,6 +42,19 @@ export class HorizonCardTiles {
           : slot))}
       </div>
     `
+  }
+
+  private sunTimesRow (): TSlot[] {
+    const times = this.data.sunData.times
+    const sunrise = this.fields.sunrise_tile
+      ? this.valueTile(EHorizonCardI18NKeys.Sunrise, times.sunrise, this.sunriseIcon()) : nothing
+    const sunset = this.fields.sunset_tile
+      ? this.valueTile(EHorizonCardI18NKeys.Sunset, times.sunset, this.sunsetIcon()) : nothing
+    return [
+      this.southernFlip ? sunset : sunrise,
+      this.fields.lux ? this.tile(EHorizonCardI18NKeys.Lux, this.data.lux ?? '-', this.luxIcon()) : nothing,
+      this.southernFlip ? sunrise : sunset
+    ]
   }
 
   private dayRows (): TSlot[][] {
@@ -145,6 +159,24 @@ export class HorizonCardTiles {
     return this.icon(svg`
       <circle class="hc-icon-track" cx="12" cy="12" r="10"/>
       <path class="hc-icon-noon" d="M12 2a10 10 0 0 0 0 20z"/>`)
+  }
+
+  private sunriseIcon (): TemplateResult {
+    return this.icon(svg`
+      <path class="hc-icon-twilight" d="M7 16a5 5 0 0 1 10 0z"/>
+      <path class="hc-icon-line" d="M3 16h18M12 4.5v4M10 6.5l2-2 2 2M5.2 10.2l1.2 1.2M18.8 10.2l-1.2 1.2"/>`)
+  }
+
+  private sunsetIcon (): TemplateResult {
+    return this.icon(svg`
+      <path class="hc-icon-twilight" d="M7 16a5 5 0 0 1 10 0z"/>
+      <path class="hc-icon-line" d="M3 16h18M12 4.5v4M10 6.5l2 2 2-2M5.2 10.2l1.2 1.2M18.8 10.2l-1.2 1.2"/>`)
+  }
+
+  private luxIcon (): TemplateResult {
+    return this.icon(svg`
+      <circle class="hc-icon-noon" cx="12" cy="12" r="4.5"/>
+      <path class="hc-icon-rays" d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/>`)
   }
 
   private azimuthIcon (): TemplateResult {

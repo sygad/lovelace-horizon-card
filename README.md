@@ -47,6 +47,35 @@ Existing `custom:horizon-card` configs keep working without changes.
 | `night_swap` | `true` | With tiles, show Moon data from sunset to sunrise and draw the Moon on the graph. |
 | `fields.day_length` | `true` | Daylight tile (middle of the second day row). |
 | `fields.moon_illumination` | `true` | Moon illumination tile (middle of the first night row). |
+| `fields.sunrise_tile` | `false` | Sunrise tile (left of a row shown above the others, day and night). |
+| `fields.sunset_tile` | `false` | Sunset tile (right of that row). |
+| `fields.lux` | `false` | Illuminance tile (middle of that row), read from `lux_entity`. |
+| `lux_entity` | | An illuminance sensor, e.g. `sensor.outdoor_illuminance`. |
+
+### Compact layout: sunrise, lux and sunset as tiles
+
+The large Sunrise/Sunset header and the vertical lines take a lot of room. To move sunrise and sunset into the tiles instead:
+
+```yaml
+type: custom:horizon-card
+sunrise_sunset_lines: false
+lux_entity: sensor.outdoor_illuminance
+fields:
+  sunrise: false        # the header above the graph
+  sunset: false
+  sunrise_tile: true
+  sunset_tile: true
+  lux: true
+  dawn: false
+  noon: false
+  dusk: false
+  day_length: false
+  moon_illumination: false
+```
+
+### Sizing in a Sections view
+
+The card follows the **Layout** tab like other cards. Left on auto it sizes to its content. Set a number of rows (or columns) and the card fills that space exactly: the tiles stay at the bottom and the graph stretches or shrinks to take the rest. The Sun and Moon stay round. No card-mod is needed.
 
 The night tiles follow the existing Moon fields (`moonrise`, `moonset`, `moon_phase`, `moon_azimuth`, `moon_elevation`), which are off by default, so turn them on:
 
@@ -382,7 +411,7 @@ By default the graph crops its height to fit the Sun and Moon, so there are no l
 
 Set a number to pin one or both sides (for example `--hc-graph-above-horizon: 55`). To turn the fitting off and keep the classic fixed frame, set `--hc-graph-above-horizon: 84` and `--hc-graph-below-horizon: 66`.
 
-When the card is given more height than its content needs, for example a fixed number of rows in a Sections view (`grid_options: rows: 6`), the tiles or fields are pinned to the bottom of the card and the graph grows to fill the free space, as extra sky above the arc. A card sized to its content is unaffected.
+When the card is given a fixed height, for example a number of rows in a Sections view (`grid_options: rows: 6`), the tiles or fields are pinned to the bottom of the card and the graph's arc stretches (or squeezes) vertically to fill the rest. A card sized to its content is unaffected.
 
 **Common recipes**
 

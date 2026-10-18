@@ -1,8 +1,11 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`HorizonCardGraph render does not render the moon when not configured so 1`] = `
-<div class="horizon-card-graph">
-  <svg xmlns="http://www.w3.org/2000/svg"
+<div class="horizon-card-graph"
+     style="aspect-ratio: 550 / 150"
+>
+  <svg preserveaspectratio="none"
+       xmlns="http://www.w3.org/2000/svg"
        viewbox="0 0 550 150"
   >
     <defs>
@@ -82,58 +85,67 @@ exports[`HorizonCardGraph render does not render the moon when not configured so
         </use>
       </mask>
     </defs>
+    <g transform="matrix(1 0 0 1 0 0)">
+    </g>
     <g class="horizon-card-sun-lines"
        transform-origin="center"
        transform="scale(1 1)"
     >
       <line class="horizon-card-sunrise-line"
-            y2="72"
             stroke="var(--hc-sunrise-line-color, var(--hc-lines, var(--hc-accent)))"
             x1="0"
             y1="3"
             x2="0"
+            y2="-12"
       >
       </line>
       <line class="horizon-card-sunset-line"
-            y2="72"
             stroke="var(--hc-sunset-line-color, var(--hc-lines, var(--hc-accent)))"
             x1="0"
             y1="3"
             x2="0"
+            y2="-12"
       >
       </line>
     </g>
     <g transform-origin="center"
-       transform="translate(0 0) scale(1 1)"
+       transform="scale(1 1)"
     >
-      <use class="horizon-card-sun-path"
-           href="#sun-path"
-           fill="none"
-           stroke="var(--hc-sun-path-color, var(--hc-lines, var(--hc-accent)))"
-      >
-      </use>
-      <path clip-path="url(#lower-path-mask)"
-            class="horizon-card-nighttime horizon-card-nighttime-past"
-            d="M5,0 H0 V150 H5"
-      >
-      </path>
-      <path clip-path="url(#lower-path-mask)"
-            class="horizon-card-nighttime horizon-card-nighttime-upcoming"
-            d="M0,0 H545 V150 H0"
-      >
-      </path>
-      <path clip-path="url(#upper-path-mask)"
-            class="horizon-card-daytime horizon-card-daytime-past"
-            d="M0,0 H0
+      <g transform="matrix(1 0 0 1 0 0) translate(0 0)">
+        <use class="horizon-card-sun-path"
+             href="#sun-path"
+             fill="none"
+             vector-effect="non-scaling-stroke"
+             stroke="var(--hc-sun-path-color, var(--hc-lines, var(--hc-accent)))"
+        >
+        </use>
+        <path clip-path="url(#lower-path-mask)"
+              vector-effect="non-scaling-stroke"
+              class="horizon-card-nighttime horizon-card-nighttime-past"
+              d="M5,0 H0 V150 H5"
+        >
+        </path>
+        <path clip-path="url(#lower-path-mask)"
+              vector-effect="non-scaling-stroke"
+              class="horizon-card-nighttime horizon-card-nighttime-upcoming"
+              d="M0,0 H545 V150 H0"
+        >
+        </path>
+        <path clip-path="url(#upper-path-mask)"
+              vector-effect="non-scaling-stroke"
+              class="horizon-card-daytime horizon-card-daytime-past"
+              d="M0,0 H0
             V0 H0"
-      >
-      </path>
-      <path clip-path="url(#upper-path-mask)"
-            class="horizon-card-daytime horizon-card-daytime-upcoming"
-            d="M0,0 H0
+        >
+        </path>
+        <path clip-path="url(#upper-path-mask)"
+              vector-effect="non-scaling-stroke"
+              class="horizon-card-daytime horizon-card-daytime-upcoming"
+              d="M0,0 H0
             V0 H0"
-      >
-      </path>
+        >
+        </path>
+      </g>
       <line class="horizon-card-horizon-line"
             x1="5"
             x2="545"
@@ -157,13 +169,18 @@ exports[`HorizonCardGraph render does not render the moon when not configured so
       >
       </circle>
     </g>
+    <g transform="matrix(1 0 0 1 0 0)">
+    </g>
   </svg>
 </div>
 `;
 
 exports[`HorizonCardGraph render does not render the sun when not configured so 1`] = `
-<div class="horizon-card-graph">
-  <svg xmlns="http://www.w3.org/2000/svg"
+<div class="horizon-card-graph"
+     style="aspect-ratio: 550 / 150"
+>
+  <svg preserveaspectratio="none"
+       xmlns="http://www.w3.org/2000/svg"
        viewbox="0 0 550 150"
   >
     <defs>
@@ -243,9 +260,13 @@ exports[`HorizonCardGraph render does not render the sun when not configured so 
         </use>
       </mask>
     </defs>
+    <g transform="matrix(1 0 0 1 0 0)">
+    </g>
     <g transform-origin="center"
-       transform="translate(0 0) scale(1 1)"
+       transform="scale(1 1)"
     >
+      <g transform="matrix(1 0 0 1 0 0) translate(0 0)">
+      </g>
       <line class="horizon-card-horizon-line"
             x1="5"
             x2="545"
@@ -261,13 +282,18 @@ exports[`HorizonCardGraph render does not render the sun when not configured so 
       >
       </path>
     </g>
+    <g transform="matrix(1 0 0 1 0 0)">
+    </g>
   </svg>
 </div>
 `;
 
 exports[`HorizonCardGraph render renders the graph with the data values when provided 1`] = `
-<div class="horizon-card-graph">
-  <svg xmlns="http://www.w3.org/2000/svg"
+<div class="horizon-card-graph"
+     style="aspect-ratio: 550 / 150"
+>
+  <svg preserveaspectratio="none"
+       xmlns="http://www.w3.org/2000/svg"
        viewbox="0 0 550 150"
   >
     <defs>
@@ -347,58 +373,67 @@ exports[`HorizonCardGraph render renders the graph with the data values when pro
         </use>
       </mask>
     </defs>
+    <g transform="matrix(1 0 0 1 0 0)">
+    </g>
     <g class="horizon-card-sun-lines"
        transform-origin="center"
        transform="scale(1 1)"
     >
       <line class="horizon-card-sunrise-line"
-            y2="72"
             stroke="var(--hc-sunrise-line-color, var(--hc-lines, var(--hc-accent)))"
             x1="200"
             y1="3"
             x2="200"
+            y2="72"
       >
       </line>
       <line class="horizon-card-sunset-line"
-            y2="72"
             stroke="var(--hc-sunset-line-color, var(--hc-lines, var(--hc-accent)))"
             x1="400"
             y1="3"
             x2="400"
+            y2="72"
       >
       </line>
     </g>
     <g transform-origin="center"
-       transform="translate(0 0) scale(1 1)"
+       transform="scale(1 1)"
     >
-      <use class="horizon-card-sun-path"
-           href="#sun-path"
-           fill="none"
-           stroke="var(--hc-sun-path-color, var(--hc-lines, var(--hc-accent)))"
-      >
-      </use>
-      <path clip-path="url(#lower-path-mask)"
-            class="horizon-card-nighttime horizon-card-nighttime-past"
-            d="M5,84 H50 V150 H5"
-      >
-      </path>
-      <path clip-path="url(#lower-path-mask)"
-            class="horizon-card-nighttime horizon-card-nighttime-upcoming"
-            d="M50,84 H545 V150 H50"
-      >
-      </path>
-      <path clip-path="url(#upper-path-mask)"
-            class="horizon-card-daytime horizon-card-daytime-past"
-            d="M200,0 H50
+      <g transform="matrix(1 0 0 1 0 0) translate(0 0)">
+        <use class="horizon-card-sun-path"
+             href="#sun-path"
+             fill="none"
+             vector-effect="non-scaling-stroke"
+             stroke="var(--hc-sun-path-color, var(--hc-lines, var(--hc-accent)))"
+        >
+        </use>
+        <path clip-path="url(#lower-path-mask)"
+              vector-effect="non-scaling-stroke"
+              class="horizon-card-nighttime horizon-card-nighttime-past"
+              d="M5,84 H50 V150 H5"
+        >
+        </path>
+        <path clip-path="url(#lower-path-mask)"
+              vector-effect="non-scaling-stroke"
+              class="horizon-card-nighttime horizon-card-nighttime-upcoming"
+              d="M50,84 H545 V150 H50"
+        >
+        </path>
+        <path clip-path="url(#upper-path-mask)"
+              vector-effect="non-scaling-stroke"
+              class="horizon-card-daytime horizon-card-daytime-past"
+              d="M200,0 H50
             V84 H200"
-      >
-      </path>
-      <path clip-path="url(#upper-path-mask)"
-            class="horizon-card-daytime horizon-card-daytime-upcoming"
-            d="M50,0 H400
+        >
+        </path>
+        <path clip-path="url(#upper-path-mask)"
+              vector-effect="non-scaling-stroke"
+              class="horizon-card-daytime horizon-card-daytime-upcoming"
+              d="M50,0 H400
             V84 H50"
-      >
-      </path>
+        >
+        </path>
+      </g>
       <line class="horizon-card-horizon-line"
             x1="5"
             x2="545"
@@ -478,13 +513,18 @@ exports[`HorizonCardGraph render renders the graph with the data values when pro
       >
       </circle>
     </g>
+    <g transform="matrix(1 0 0 1 0 0)">
+    </g>
   </svg>
 </div>
 `;
 
 exports[`HorizonCardGraph render renders the graph with the default values when data values are not provided 1`] = `
-<div class="horizon-card-graph">
-  <svg xmlns="http://www.w3.org/2000/svg"
+<div class="horizon-card-graph"
+     style="aspect-ratio: 550 / 150"
+>
+  <svg preserveaspectratio="none"
+       xmlns="http://www.w3.org/2000/svg"
        viewbox="0 0 550 150"
   >
     <defs>
@@ -564,58 +604,67 @@ exports[`HorizonCardGraph render renders the graph with the default values when 
         </use>
       </mask>
     </defs>
+    <g transform="matrix(1 0 0 1 0 0)">
+    </g>
     <g class="horizon-card-sun-lines"
        transform-origin="center"
        transform="scale(1 1)"
     >
       <line class="horizon-card-sunrise-line"
-            y2="72"
             stroke="var(--hc-sunrise-line-color, var(--hc-lines, var(--hc-accent)))"
             x1="0"
             y1="3"
             x2="0"
+            y2="-12"
       >
       </line>
       <line class="horizon-card-sunset-line"
-            y2="72"
             stroke="var(--hc-sunset-line-color, var(--hc-lines, var(--hc-accent)))"
             x1="0"
             y1="3"
             x2="0"
+            y2="-12"
       >
       </line>
     </g>
     <g transform-origin="center"
-       transform="translate(0 0) scale(1 1)"
+       transform="scale(1 1)"
     >
-      <use class="horizon-card-sun-path"
-           href="#sun-path"
-           fill="none"
-           stroke="var(--hc-sun-path-color, var(--hc-lines, var(--hc-accent)))"
-      >
-      </use>
-      <path clip-path="url(#lower-path-mask)"
-            class="horizon-card-nighttime horizon-card-nighttime-past"
-            d="M5,0 H0 V150 H5"
-      >
-      </path>
-      <path clip-path="url(#lower-path-mask)"
-            class="horizon-card-nighttime horizon-card-nighttime-upcoming"
-            d="M0,0 H545 V150 H0"
-      >
-      </path>
-      <path clip-path="url(#upper-path-mask)"
-            class="horizon-card-daytime horizon-card-daytime-past"
-            d="M0,0 H0
+      <g transform="matrix(1 0 0 1 0 0) translate(0 0)">
+        <use class="horizon-card-sun-path"
+             href="#sun-path"
+             fill="none"
+             vector-effect="non-scaling-stroke"
+             stroke="var(--hc-sun-path-color, var(--hc-lines, var(--hc-accent)))"
+        >
+        </use>
+        <path clip-path="url(#lower-path-mask)"
+              vector-effect="non-scaling-stroke"
+              class="horizon-card-nighttime horizon-card-nighttime-past"
+              d="M5,0 H0 V150 H5"
+        >
+        </path>
+        <path clip-path="url(#lower-path-mask)"
+              vector-effect="non-scaling-stroke"
+              class="horizon-card-nighttime horizon-card-nighttime-upcoming"
+              d="M0,0 H545 V150 H0"
+        >
+        </path>
+        <path clip-path="url(#upper-path-mask)"
+              vector-effect="non-scaling-stroke"
+              class="horizon-card-daytime horizon-card-daytime-past"
+              d="M0,0 H0
             V0 H0"
-      >
-      </path>
-      <path clip-path="url(#upper-path-mask)"
-            class="horizon-card-daytime horizon-card-daytime-upcoming"
-            d="M0,0 H0
+        >
+        </path>
+        <path clip-path="url(#upper-path-mask)"
+              vector-effect="non-scaling-stroke"
+              class="horizon-card-daytime horizon-card-daytime-upcoming"
+              d="M0,0 H0
             V0 H0"
-      >
-      </path>
+        >
+        </path>
+      </g>
       <line class="horizon-card-horizon-line"
             x1="5"
             x2="545"
@@ -695,13 +744,18 @@ exports[`HorizonCardGraph render renders the graph with the default values when 
       >
       </circle>
     </g>
+    <g transform="matrix(1 0 0 1 0 0)">
+    </g>
   </svg>
 </div>
 `;
 
 exports[`HorizonCardGraph renders the graph flipped horizontally when configured so 1`] = `
-<div class="horizon-card-graph">
-  <svg xmlns="http://www.w3.org/2000/svg"
+<div class="horizon-card-graph"
+     style="aspect-ratio: 550 / 150"
+>
+  <svg preserveaspectratio="none"
+       xmlns="http://www.w3.org/2000/svg"
        viewbox="0 0 550 150"
   >
     <defs>
@@ -781,58 +835,67 @@ exports[`HorizonCardGraph renders the graph flipped horizontally when configured
         </use>
       </mask>
     </defs>
+    <g transform="matrix(1 0 0 1 0 0)">
+    </g>
     <g class="horizon-card-sun-lines"
        transform-origin="center"
        transform="scale(-1 1)"
     >
       <line class="horizon-card-sunrise-line"
-            y2="72"
             stroke="var(--hc-sunrise-line-color, var(--hc-lines, var(--hc-accent)))"
             x1="0"
             y1="3"
             x2="0"
+            y2="-12"
       >
       </line>
       <line class="horizon-card-sunset-line"
-            y2="72"
             stroke="var(--hc-sunset-line-color, var(--hc-lines, var(--hc-accent)))"
             x1="0"
             y1="3"
             x2="0"
+            y2="-12"
       >
       </line>
     </g>
     <g transform-origin="center"
-       transform="translate(0 0) scale(-1 1)"
+       transform="scale(-1 1)"
     >
-      <use class="horizon-card-sun-path"
-           href="#sun-path"
-           fill="none"
-           stroke="var(--hc-sun-path-color, var(--hc-lines, var(--hc-accent)))"
-      >
-      </use>
-      <path clip-path="url(#lower-path-mask)"
-            class="horizon-card-nighttime horizon-card-nighttime-past"
-            d="M5,0 H0 V150 H5"
-      >
-      </path>
-      <path clip-path="url(#lower-path-mask)"
-            class="horizon-card-nighttime horizon-card-nighttime-upcoming"
-            d="M0,0 H545 V150 H0"
-      >
-      </path>
-      <path clip-path="url(#upper-path-mask)"
-            class="horizon-card-daytime horizon-card-daytime-past"
-            d="M0,0 H0
+      <g transform="matrix(1 0 0 1 0 0) translate(0 0)">
+        <use class="horizon-card-sun-path"
+             href="#sun-path"
+             fill="none"
+             vector-effect="non-scaling-stroke"
+             stroke="var(--hc-sun-path-color, var(--hc-lines, var(--hc-accent)))"
+        >
+        </use>
+        <path clip-path="url(#lower-path-mask)"
+              vector-effect="non-scaling-stroke"
+              class="horizon-card-nighttime horizon-card-nighttime-past"
+              d="M5,0 H0 V150 H5"
+        >
+        </path>
+        <path clip-path="url(#lower-path-mask)"
+              vector-effect="non-scaling-stroke"
+              class="horizon-card-nighttime horizon-card-nighttime-upcoming"
+              d="M0,0 H545 V150 H0"
+        >
+        </path>
+        <path clip-path="url(#upper-path-mask)"
+              vector-effect="non-scaling-stroke"
+              class="horizon-card-daytime horizon-card-daytime-past"
+              d="M0,0 H0
             V0 H0"
-      >
-      </path>
-      <path clip-path="url(#upper-path-mask)"
-            class="horizon-card-daytime horizon-card-daytime-upcoming"
-            d="M0,0 H0
+        >
+        </path>
+        <path clip-path="url(#upper-path-mask)"
+              vector-effect="non-scaling-stroke"
+              class="horizon-card-daytime horizon-card-daytime-upcoming"
+              d="M0,0 H0
             V0 H0"
-      >
-      </path>
+        >
+        </path>
+      </g>
       <line class="horizon-card-horizon-line"
             x1="5"
             x2="545"
@@ -855,6 +918,8 @@ exports[`HorizonCardGraph renders the graph flipped horizontally when configured
               r="17"
       >
       </circle>
+    </g>
+    <g transform="matrix(1 0 0 1 0 0)">
     </g>
   </svg>
 </div>

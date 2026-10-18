@@ -22,6 +22,11 @@ export type THorizonCardFields = {
   // Tile footer only
   day_length?: boolean
   moon_illumination?: boolean
+  // Sunrise / sunset as tiles (the plain sunrise/sunset fields are the large header above the graph)
+  sunrise_tile?: boolean
+  sunset_tile?: boolean
+  // Illuminance read from `lux_entity`
+  lux?: boolean
 }
 
 export interface IHorizonCardConfig extends LovelaceCardConfig {
@@ -38,6 +43,8 @@ export interface IHorizonCardConfig extends LovelaceCardConfig {
   tiles?: boolean,
   // With tiles: between sunset and sunrise, show Moon data instead of Sun data (and draw the Moon)
   night_swap?: boolean,
+  // Illuminance sensor shown by the `lux` tile
+  lux_entity?: string,
   time_format?: TimeFormat
   number_format?: NumberFormat
 
@@ -141,6 +148,11 @@ export type THorizonCardData = {
   readonly moonPosition: TMoonPosition
   readonly moonData: TMoonData
   readonly graphFrame: TGraphFrame
+  // Height (viewBox units, width 550) of the box the graph is drawn into. Set once the card has
+  // measured the space it was given; the graph stretches vertically to fill it.
+  readonly graphViewHeight?: number
+  // Formatted state of `lux_entity`, read from hass on every render
+  readonly lux?: string
 }
 
 export enum EHorizonCardI18NKeys {
@@ -154,7 +166,8 @@ export enum EHorizonCardI18NKeys {
   Moonrise = 'moonrise',
   Moonset = 'moonset',
   DayLength = 'day_length',
-  MoonIllumination = 'moon_illumination'
+  MoonIllumination = 'moon_illumination',
+  Lux = 'lux'
 }
 
 export type THorizonCardI18NErrorKeys = {

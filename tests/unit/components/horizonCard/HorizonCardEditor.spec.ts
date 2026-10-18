@@ -100,6 +100,15 @@ describe('HorizonCardEditor', () => {
       expect(roundTrip({ type: 'horizon-card' })).toEqual({ type: 'horizon-card' })
     })
 
+    it('round-trips the sunrise / lux / sunset tiles and the lux entity', () => {
+      const config = {
+        type: 'horizon-card',
+        lux_entity: 'sensor.outdoor_illuminance',
+        fields: { sunrise: false, sunset: false, sunrise_tile: true, sunset_tile: true, lux: true }
+      } as IHorizonCardConfig
+      expect(roundTrip(config)).toEqual(config)
+    })
+
     it('keeps a disabled default-on toggle and drops it again when re-enabled', () => {
       expect(roundTrip({ type: 'horizon-card', moon: false })).toEqual({ type: 'horizon-card', moon: false })
       expect(roundTrip({ type: 'horizon-card', moon: true })).toEqual({ type: 'horizon-card' })

@@ -60,18 +60,18 @@ export class HorizonCard extends LitElement {
 
   private lastComputeTimestamp = 0
 
-  // Extra sky (viewBox units) added above the graph so it fills a card taller than its content.
-  private fillExtra = 0
+  // Height (viewBox units) of the box the graph is given, measured from the rendered layout.
+  @state()
+  private accessor graphViewHeight: number | undefined
 
   private readonly resizeObserver = typeof ResizeObserver === 'undefined'
     ? undefined
-    : new ResizeObserver(() => {
-      if (this.data && !this.data.partial) {
-        this.fitGraphToCard()
-      }
-    })
+    : new ResizeObserver(() => this.measureGraph())
 
-  private observedContent?: HTMLElement
+  private observedGraph?: HTMLElement
+
+  // Last seen state object of `lux_entity`, to re-render only when it actually changes
+  private lastLuxState?: unknown
 
   private readonly onVisibilityChange = () => {
     if (!this.config) {
@@ -103,6 +103,13 @@ export class HorizonCard extends LitElement {
     if (!this.config) {
       return
     }
+    if (this.config.lux_entity) {
+      const luxState = hass.states[this.config.lux_entity]
+      if (luxState !== this.lastLuxState) {
+        this.lastLuxState = luxState
+        this.requestUpdate()
+      }
+    }
     const p = this.refreshPeriodMs()
     if (p > 0 && Date.now() - this.lastComputeTimestamp >= p) {
       this.hasCalculated = false
@@ -130,12 +137,7 @@ export class HorizonCard extends LitElement {
     }
 
     if ((this.config.tiles ?? Constants.DEFAULT_CONFIG.tiles) !== false) {
-      // Tiles: at most two rows, whichever of the day or night sets is larger
-      const dayRows = [fieldConfig.dawn || fieldConfig.noon || fieldConfig.dusk,
-        fieldConfig.sun_azimuth || fieldConfig.day_length || fieldConfig.sun_elevation].filter(Boolean).length
-      const nightRows = !this.nightSwap() ? 0 : [fieldConfig.moonrise || fieldConfig.moon_illumination || fieldConfig.moonset,
-        fieldConfig.moon_azimuth || fieldConfig.moon_phase || fieldConfig.moon_elevation].filter(Boolean).length
-      height += Math.max(dayRows, nightRows)
+      height += this.tileRows(fieldConfig)
       this.debug(() => `getCardSize() => ${height}`, 2)
       return height
     }
@@ -157,18 +159,41 @@ export class HorizonCard extends LitElement {
     return height
 	}
 
+  // Tile rows shown: the sunrise/lux/sunset row plus at most two more, whichever of the day or
+  // night sets is larger.
+  private tileRows (fieldConfig: THorizonCardFields): number {
+    const sunTimesRow = fieldConfig.sunrise_tile || fieldConfig.lux || fieldConfig.sunset_tile ? 1 : 0
+    const dayRows = [fieldConfig.dawn || fieldConfig.noon || fieldConfig.dusk,
+      fieldConfig.sun_azimuth || fieldConfig.day_length || fieldConfig.sun_elevation].filter(Boolean).length
+    const nightRows = !this.nightSwap() ? 0 : [fieldConfig.moonrise || fieldConfig.moon_illumination || fieldConfig.moonset,
+      fieldConfig.moon_azimuth || fieldConfig.moon_phase || fieldConfig.moon_elevation].filter(Boolean).length
+    return sunTimesRow + Math.max(dayRows, nightRows)
+  }
+
   /**
-   * Called by HASS to size the card in the Sections view grid. We intentionally do NOT
-   * report a fixed `rows` value: the grid quantizes height to whole rows (56px cell + 8px
-   * gap), so any fixed count rounds up and leaves an empty gap below the card (issue #192).
-   * Omitting `rows` lets the card size to its actually-rendered content instead, so it is
-   * correct at whatever height the card renders — unlike the removed pixel model, which was
-   * calibrated for a single card width. We still declare the 12-column default and allow the
-   * card to be narrowed to half width.
+   * Called by HASS to size the card in the Sections view grid. No `rows` is reported, so by default
+   * the card sizes to its content. When rows are set in the layout editor the card fills exactly
+   * that height: the tiles stay at the bottom and the graph stretches (or squeezes) to take the
+   * rest (see measureGraph). `min_rows` keeps enough room for the header and tiles.
    * @see https://developers.home-assistant.io/docs/frontend/custom-ui/custom-card/#sizing-in-sections-view
    */
-  public getGridOptions (): { columns: number, min_columns: number } {
-    return { columns: 12, min_columns: 6 }
+  public getGridOptions (): { columns: number, min_columns: number, min_rows: number } {
+    // A grid row is 56px + 8px gap; a tile row is ~44px and the title/header ~40px each, and the
+    // graph needs at least a row of its own.
+    let px = 56
+    if (this.config) {
+      const fieldConfig = this.expandedFieldConfig()
+      if (this.config.title) {
+        px += 40
+      }
+      if (fieldConfig.sunrise || fieldConfig.sunset) {
+        px += 40
+      }
+      if ((this.config.tiles ?? Constants.DEFAULT_CONFIG.tiles) !== false) {
+        px += this.tileRows(fieldConfig) * 44
+      }
+    }
+    return { columns: 12, min_columns: 3, min_rows: Math.max(1, Math.ceil((px + 8) / 64)) }
   }
 
   // called by HASS whenever config changes
@@ -214,7 +239,9 @@ export class HorizonCard extends LitElement {
       `${this.data.moonData.lightnessReduce * moonLightnessReduceSign}%`)
 
     // render components
-    return new HorizonCardContent(expandedConfig, this.data, this.i18n(expandedConfig)).render()
+    const i18n = this.i18n(expandedConfig)
+    const data = { ...this.data, graphViewHeight: this.graphViewHeight, lux: this.luxValue(i18n) }
+    return new HorizonCardContent(expandedConfig, data, i18n).render()
   }
 
   protected override updated (changedProperties: Map<string | number | symbol, unknown>): void {
@@ -233,9 +260,8 @@ export class HorizonCard extends LitElement {
     } else if (this.data.partial) {
       this.calculateStateFinal()
       this.scheduleRefresh()
-    } else {
-      this.fitGraphToCard()
     }
+    this.observeGraph()
   }
 
   override connectedCallback () {
@@ -253,7 +279,7 @@ export class HorizonCard extends LitElement {
     window.clearTimeout(this.refreshTimer)
     document.removeEventListener('visibilitychange', this.onVisibilityChange)
     this.resizeObserver?.disconnect()
-    this.observedContent = undefined
+    this.observedGraph = undefined
     this.debug('disconnectedCallback()', 2)
   }
 
@@ -627,48 +653,57 @@ export class HorizonCard extends LitElement {
     }
 
     const overrides = this.cropOverrides()
-    const frame = this.graphFrameFor(sunShown, moonShown, scaleY, offsetY, min, max, overrides.above, overrides.below)
-    return { top: frame.top - this.fillExtra, height: frame.height + this.fillExtra }
+    return this.graphFrameFor(sunShown, moonShown, scaleY, offsetY, min, max, overrides.above, overrides.below)
   }
 
-  // When the card is given more height than its content needs (a fixed number of rows in a Sections
-  // view, or a height set with card-mod), the footer is pinned to the bottom (see cardStyles) and the
-  // graph takes up the free space as extra sky above the Sun path. A card sized to its content has
-  // no free space, so it is unchanged. Converges in one pass: the next measurement finds ~0 free.
-  private fitGraphToCard (): void {
-    const content = this.shadowRoot?.querySelector('.horizon-card.card-content')
-    if (!(content instanceof HTMLElement)) {
+  // The graph box is a flex item: sized to the graph's natural aspect ratio when the card sizes to
+  // its content, stretched or squeezed when the card has a fixed height (rows in a Sections view,
+  // or a height set by a theme/card-mod). The SVG fills the box absolutely, so it never feeds back
+  // into the layout; its viewBox height is matched to the box so the curve stretches to fill it
+  // while the Sun and Moon stay round.
+  private observeGraph (): void {
+    const graph = this.shadowRoot?.querySelector('.horizon-card-graph')
+    if (!(graph instanceof HTMLElement)) {
       return
     }
-    // The content box is the height the card gives it (min-height: 0), so the observer fires when
-    // either the host or the ha-card itself (card-mod) is resized.
-    if (content !== this.observedContent) {
-      if (this.observedContent) {
-        this.resizeObserver?.unobserve(this.observedContent)
+    if (graph !== this.observedGraph) {
+      if (this.observedGraph) {
+        this.resizeObserver?.unobserve(this.observedGraph)
       }
-      this.observedContent = content
-      this.resizeObserver?.observe(content)
+      this.observedGraph = graph
+      this.resizeObserver?.observe(graph)
     }
-    const graph = content.querySelector('.horizon-card-graph')
-    const last = content.lastElementChild
-    const width = graph?.querySelector('svg')?.getBoundingClientRect().width ?? 0
-    if (!graph || !last || width <= 0) {
+  }
+
+  private measureGraph (): void {
+    const graph = this.observedGraph
+    if (!graph || !graph.isConnected) {
       return
     }
-    // Free space = the footer's auto top margin (the gap past the graph's own margin) plus anything
-    // below the last child, which goes negative when a shrunken card makes the content overflow.
-    const graphBottom = graph.getBoundingClientRect().bottom + parseFloat(getComputedStyle(graph).marginBottom)
-    const autoGap = graph.nextElementSibling ? graph.nextElementSibling.getBoundingClientRect().top - graphBottom : 0
-    const limit = content.getBoundingClientRect().bottom - parseFloat(getComputedStyle(content).paddingBottom)
-    const lastBottom = last.getBoundingClientRect().bottom + parseFloat(getComputedStyle(last).marginBottom)
-    const free = autoGap + limit - lastBottom
-    const fill = Math.max(0, this.fillExtra + free * Constants.GRAPH_WIDTH / width)
-    if (Math.abs(fill - this.fillExtra) < 0.5) {
+    const { width, height } = graph.getBoundingClientRect()
+    if (width <= 0 || height <= 0) {
       return
     }
-    this.debug(() => `fitGraphToCard() => ${fill}`, 2)
-    this.fillExtra = fill
-    this.data = { ...this.data, graphFrame: this.computeGraphFrame(this.data.sunPosition.scaleY, this.data.sunPosition.offsetY) }
+    const viewHeight = Constants.GRAPH_WIDTH * height / width
+    if (this.graphViewHeight !== undefined && Math.abs(viewHeight - this.graphViewHeight) < 0.5) {
+      return
+    }
+    this.debug(() => `measureGraph() => ${viewHeight}`, 2)
+    this.graphViewHeight = viewHeight
+  }
+
+  // The `lux_entity` state formatted for the lux tile, or undefined when it is not available.
+  private luxValue (i18n: I18N): string | undefined {
+    const entity = this.config.lux_entity
+    const state = entity ? this.lastHass.states[entity] : undefined
+    if (!state) {
+      return undefined
+    }
+    const value = Number(state.state)
+    if (state.state === '' || !Number.isFinite(value)) {
+      return undefined
+    }
+    return i18n.formatDecimal(Math.round(value))
   }
 
   private latitude (): number {

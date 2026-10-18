@@ -18,7 +18,8 @@ export const HORIZON_CARD_EDITOR_TAG = 'horizon-card-editor'
 // 1:1 to a config key (no shared-vs-per-body coupling). Defaults mirror Constants.DEFAULT_CONFIG.fields
 // (sun times default on; positions and moon extras default off).
 const FIELD_DEFAULTS: Record<string, boolean> = {
-  sunrise: true, sunset: true, dawn: true, noon: true, dusk: true,
+  sunrise: true, sunset: true, sunrise_tile: false, sunset_tile: false, lux: false,
+  dawn: true, noon: true, dusk: true,
   sun_azimuth: false, moon_azimuth: false, sun_elevation: false, moon_elevation: false,
   moonrise: false, moonset: false, moon_phase: false,
   day_length: true, moon_illumination: true
@@ -111,7 +112,8 @@ export class HorizonCardEditor extends LitElement {
       { name: '', type: 'grid', schema: DEFAULT_TRUE_BOOLEANS.map(bool) },
       {
         type: 'expandable', title: i18n.tr('editor_section_fields'), schema: [
-          { name: '', type: 'grid', schema: Object.keys(FIELD_DEFAULTS).map((name) => bool('field_' + name)) }
+          { name: '', type: 'grid', schema: Object.keys(FIELD_DEFAULTS).map((name) => bool('field_' + name)) },
+          { name: 'lux_entity', selector: { entity: { filter: { domain: 'sensor', device_class: 'illuminance' } } } }
         ]
       },
       {
@@ -189,6 +191,10 @@ export class HorizonCardEditor extends LitElement {
 
       field_sunrise: fieldValue('sunrise'),
       field_sunset: fieldValue('sunset'),
+      field_sunrise_tile: fieldValue('sunrise_tile'),
+      field_sunset_tile: fieldValue('sunset_tile'),
+      field_lux: fieldValue('lux'),
+      lux_entity: config.lux_entity,
       field_dawn: fieldValue('dawn'),
       field_noon: fieldValue('noon'),
       field_dusk: fieldValue('dusk'),
@@ -336,6 +342,11 @@ export class HorizonCardEditor extends LitElement {
       } else {
         delete config[key]
       }
+    }
+    if (has(data.lux_entity)) {
+      config.lux_entity = data.lux_entity
+    } else {
+      delete config.lux_entity
     }
     if (has(data.title)) {
       config.title = data.title

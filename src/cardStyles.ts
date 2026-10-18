@@ -52,9 +52,10 @@ export default css`
     --_hc-moon-outline-color: #6b7789;
   }
 
-  /* Fill the height the dashboard gives the card (e.g. fixed rows in a Sections view): the footer
-     is pinned to the bottom and the graph grows into the free space (HorizonCard.fitGraphToCard).
-     A card sized to its content is unaffected. */
+  /* Fill the height the dashboard gives the card (rows in a Sections view, or a height from a
+     theme/card-mod): the tiles stay at the bottom and the graph box grows or shrinks to take the
+     rest; the card measures that box and stretches the curve to fill it (HorizonCard.measureGraph).
+     A card sized to its content keeps the graph's natural aspect ratio. */
   :host {
     display: block;
     height: 100%;
@@ -67,13 +68,18 @@ export default css`
     flex-direction: column;
   }
 
-  /* min-height: 0 keeps the content at the height the card gives it even when that is less than
-     it needs, so fitGraphToCard sees the overflow and shrinks the graph back. */
+  /* min-height: 0 keeps the content at the height the card gives it, so the graph box (the only
+     flexible child) absorbs any difference instead of the card overflowing its grid cell. */
   .horizon-card.card-content {
     flex: 1 1 auto;
     min-height: 0;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
+  }
+
+  .horizon-card.card-content > * {
+    flex: none;
   }
 
   /* Two classes so it wins over the footers' own margin shorthands below. */
@@ -156,7 +162,12 @@ export default css`
     margin-bottom: 1em;
   }
 
-  .horizon-card-graph {
+  /* The graph box takes its natural aspect ratio (inline style) as its base size, then grows or
+     shrinks with the card. The SVG is absolutely positioned so it never feeds back into the size. */
+  .horizon-card.card-content > .horizon-card-graph {
+    flex: 1 1 auto;
+    min-height: 24px;
+    position: relative;
     margin: 1em 0;
   }
 
@@ -255,6 +266,17 @@ export default css`
     fill: var(--hc-tile-sun-color, #f9d65c);
   }
 
+  .horizon-card-tile-icon .hc-icon-twilight {
+    fill: var(--hc-tile-twilight-color, #f5a54a);
+  }
+
+  .horizon-card-tile-icon .hc-icon-rays {
+    fill: none;
+    stroke: var(--hc-tile-twilight-color, #f5a54a);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+  }
+
   .horizon-card-tile-icon .hc-icon-line {
     fill: none;
     stroke: var(--hc-tile-icon-color, var(--hc-primary));
@@ -283,12 +305,12 @@ export default css`
     fill: var(--hc-moon-shadow-color, var(--_hc-moon-shadow-color));
   }
 
-  /* The SVG scales to the container width; its height follows the viewBox aspect ratio, so the
-     balanced-frame crop (which changes the viewBox height) changes the rendered card height. */
   .horizon-card-graph svg {
+    position: absolute;
+    inset: 0;
     display: block;
     width: 100%;
-    height: auto;
+    height: 100%;
   }
 
   /* The 1em only separates the graph from the field rows above and below it.
@@ -296,11 +318,11 @@ export default css`
      margin is a pure edge gap, so drop it there: the graph then sits flush
      against the card padding and a single padding override makes it reach the
      edges, no separate graph-margin override needed (#220). */
-  .horizon-card-graph:first-child {
+  .horizon-card.card-content > .horizon-card-graph:first-child {
     margin-top: 0;
   }
 
-  .horizon-card-graph:last-child {
+  .horizon-card.card-content > .horizon-card-graph:last-child {
     margin-bottom: 0;
   }
 

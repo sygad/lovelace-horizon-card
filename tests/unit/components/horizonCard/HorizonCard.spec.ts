@@ -831,27 +831,54 @@ describe('HorizonCard', () => {
   })
 
   describe('getGridOptions', () => {
-    // The card must size to its rendered content in the Sections view. Reporting a fixed
-    // `rows` count quantizes the card to whole grid rows and leaves an empty gap below it
-    // (issue #192), so getGridOptions() intentionally omits `rows`/`min_rows` and only pins
-    // the columns (12 by default, narrowable to half width via min_columns).
-    it('reports a 12-column default that can be narrowed to half width', () => {
+    // The card sizes to its content by default (no `rows`, issue #192). When rows are set in the
+    // layout editor it fills them exactly (the graph stretches), and `min_rows` stops the slider
+    // going below what the header and tiles need.
+    it('reports a 12-column default, narrowable to a quarter width, with no fixed rows', () => {
       horizonCard.setConfig({} as IHorizonCardConfig)
 
-      expect(horizonCard.getGridOptions()).toEqual({ columns: 12, min_columns: 6 })
+      // graph 56 + header 40 + two tile rows 88 = 184 (+8 gap) => 3 rows of 64px
+      expect(horizonCard.getGridOptions()).toEqual({ columns: 12, min_columns: 3, min_rows: 3 })
     })
 
-    it('stays config-independent: even the heaviest config never pins a row count', () => {
-      // Regression guard against re-introducing a config-dependent `rows`: this config used
-      // to produce the tallest fixed row estimate, and it must now still omit rows/min_rows.
+    it('never pins a row count, but raises min_rows for a heavier config', () => {
       horizonCard.setConfig({
         title: 'Fancy Card',
-        fields: { azimuth: true, elevation: true, moonrise: true, moonset: true, moon_phase: true }
+        fields: { azimuth: true, elevation: true, moonrise: true, moonset: true, moon_phase: true, lux: true }
       } as IHorizonCardConfig)
 
       const gridOptions = horizonCard.getGridOptions() as Record<string, unknown>
       expect(gridOptions.rows).toBeUndefined()
-      expect(gridOptions.min_rows).toBeUndefined()
+      // graph 56 + title 40 + header 40 + three tile rows 132 = 268 (+8) => 5 rows
+      expect(gridOptions.min_rows).toEqual(5)
+    })
+
+    it('needs only a couple of rows for the compact sunrise / lux / sunset layout', () => {
+      horizonCard.setConfig({
+        fields: {
+          sunrise: false, sunset: false, dawn: false, noon: false, dusk: false, day_length: false,
+          moon_illumination: false, sunrise_tile: true, sunset_tile: true, lux: true
+        }
+      } as IHorizonCardConfig)
+
+      expect(horizonCard.getGridOptions().min_rows).toEqual(2)
+    })
+  })
+
+  describe('lux', () => {
+    it('formats the lux entity state and is undefined when it is missing or not a number', () => {
+      horizonCard.setConfig({ lux_entity: 'sensor.lux' } as IHorizonCardConfig)
+      // I18N is auto-mocked in this spec, so stand in a formatter
+      const i18n = { formatDecimal: (n: number) => n.toLocaleString('en-US') } as unknown as I18N
+
+      horizonCard.hass = { ...SaneHomeAssistant, states: { 'sensor.lux': { state: '12000.4' } } } as unknown as HomeAssistant
+      expect(horizonCard['luxValue'](i18n)).toEqual('12,000')
+
+      horizonCard.hass = { ...SaneHomeAssistant, states: { 'sensor.lux': { state: 'unavailable' } } } as unknown as HomeAssistant
+      expect(horizonCard['luxValue'](i18n)).toBeUndefined()
+
+      horizonCard.hass = { ...SaneHomeAssistant, states: {} } as unknown as HomeAssistant
+      expect(horizonCard['luxValue'](i18n)).toBeUndefined()
     })
   })
 

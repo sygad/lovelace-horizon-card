@@ -55,7 +55,10 @@ export class Constants {
       moonset: false,
       moon_phase: false,
       day_length: true,
-      moon_illumination: true
+      moon_illumination: true,
+      sunrise_tile: false,
+      sunset_tile: false,
+      lux: false
     }
     // These keys must not be in the default config as they are provided by Home Assistant:
     // language, dark_mode, latitude, longitude, elevation, time_zone.
@@ -139,6 +142,13 @@ export class Constants {
 
   // Distance of the sunrise/sunset line tops from the (cropped) frame's top edge.
   static readonly GRAPH_LINE_INSET_TOP = 3
+
+  // Inset (viewBox units) kept at the top and bottom of the graph when it is stretched to fill a
+  // taller or shorter card, so the Sun and Moon discs at their extremes keep their full radius.
+  static readonly GRAPH_STRETCH_INSET = Constants.SUN_RADIUS + Constants.GRAPH_EDGE_PADDING
+
+  // Smallest vertical stretch of the curve when the card is squeezed below its natural height.
+  static readonly GRAPH_MIN_STRETCH = 0.25
 
   // Number of samples (every 30 min over 24 h) used to find the Moon's daily elevation extremes.
   static readonly MOON_EXTREME_SAMPLES = 48

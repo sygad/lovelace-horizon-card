@@ -111,7 +111,7 @@ describe('HorizonCardGraph', () => {
       expect(html).toContain('horizon-card-sun-path')
     })
 
-    it(`crops the viewBox and the sunrise/sunset line tops to the graph frame`, async () => {
+    it(`sizes the viewBox to the graph frame and hangs the sunrise/sunset lines from its top`, async () => {
       const config = {
         sun: true
       } as IHorizonCardConfig
@@ -126,9 +126,42 @@ describe('HorizonCardGraph', () => {
 
       const html = await TemplateResultTestHelper.renderElement(horizonCardGraph)
 
-      expect(html).toContain('viewBox="0 30 550 90"')
-      // The sunrise/sunset line tops track the frame top (30 + GRAPH_LINE_INSET_TOP 3).
-      expect(html).toContain('y1="33"')
+      // The frame is drawn from y = 0; its natural height sets the box's aspect ratio.
+      expect(html).toContain('viewBox="0 0 550 90"')
+      expect(html).toContain('aspect-ratio: 550 / 90')
+      // The sunrise/sunset line tops sit GRAPH_LINE_INSET_TOP below the top of the drawing.
+      expect(html).toContain('y1="3"')
+      // Unstretched: the curve group is only shifted by the frame top.
+      expect(html).toContain('matrix(1 0 0 1 0 -30)')
+    })
+
+    it(`stretches the curve, but not the Sun, to fill a taller box`, async () => {
+      // Frame 0..150 with the horizon at 84; a box twice as tall stretches the curve between the
+      // 19-unit insets: (300 - 38) / (150 - 38) = 2.339...
+      const data = {
+        ...Constants.DEFAULT_CARD_DATA,
+        sunPosition: { ...Constants.DEFAULT_CARD_DATA.sunPosition, x: 275, y: 84, horizonY: 84 },
+        graphViewHeight: 300
+      } as THorizonCardData
+
+      const html = await TemplateResultTestHelper.renderElement(new HorizonCardGraph({ sun: true } as IHorizonCardConfig, data))
+
+      const stretch = (300 - 38) / (150 - 38)
+      const horizon = 19 + (84 - 19) * stretch
+      expect(html).toContain('viewBox="0 0 550 300"')
+      expect(html).toContain(`matrix(1 0 0 ${stretch} 0 ${19 - 19 * stretch})`)
+      // The horizon line and the Sun's centre are mapped, the Sun's radius is not.
+      expect(html).toContain(`y1="${horizon}"`)
+      expect(html).toContain(`cy="${horizon}"`)
+      expect(html).toContain(`r="${Constants.SUN_RADIUS}"`)
+    })
+
+    it(`never squeezes the curve below the minimum stretch`, async () => {
+      const data = { ...Constants.DEFAULT_CARD_DATA, graphViewHeight: 10 } as THorizonCardData
+
+      const html = await TemplateResultTestHelper.renderElement(new HorizonCardGraph({ sun: true } as IHorizonCardConfig, data))
+
+      expect(html).toContain(`matrix(1 0 0 ${Constants.GRAPH_MIN_STRETCH} 0`)
     })
 
     it(`falls back to the classic viewBox when the data has no frame`, async () => {

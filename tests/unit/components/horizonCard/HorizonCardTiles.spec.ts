@@ -92,6 +92,30 @@ describe('HorizonCardTiles', () => {
     expect(tileKeys(html)).toEqual(['dawn', 'noon', 'dusk'])
   })
 
+  it('shows the sunrise / lux / sunset row first, day and night', async () => {
+    const fields = { ...allFields, sunrise_tile: true, lux: true, sunset_tile: true }
+    const day = makeData('2026-10-12T09:30:00Z')
+    const dayHtml = await render({ fields }, { ...day, lux: '12,000' })
+    expect(tileKeys(dayHtml).slice(0, 3)).toEqual(['sunrise', 'lux', 'sunset'])
+    expect(dayHtml).toContain('12,000')
+
+    const nightHtml = await render({ fields }, makeData('2026-10-12T20:45:00Z', -24.6))
+    expect(tileKeys(nightHtml).slice(0, 4)).toEqual(['sunrise', 'lux', 'sunset', 'moonrise'])
+  })
+
+  it('shows a dash in the lux tile when the sensor has no value', async () => {
+    const fields = { lux: true }
+    const html = await render({ fields }, makeData('2026-10-12T09:30:00Z'))
+    expect(tileKeys(html)).toEqual(['empty', 'lux', 'empty'])
+    expect(html).toMatch(/horizon-card-tile-value">(<!--[^>]*-->)?-</)
+  })
+
+  it('swaps sunrise and sunset with the southern flip', async () => {
+    const html = await render({ southern_flip: true, fields: { sunrise_tile: true, sunset_tile: true } },
+      makeData('2026-10-12T09:30:00Z'))
+    expect(tileKeys(html)).toEqual(['sunset', 'empty', 'sunrise'])
+  })
+
   it('renders nothing when every field is hidden', async () => {
     const none = Object.fromEntries(Object.keys(allFields).map((k) => [k, false]))
     const html = await render({ fields: none }, makeData('2026-10-12T09:30:00Z'))
