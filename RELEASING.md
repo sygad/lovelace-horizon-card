@@ -3,10 +3,11 @@
 Everything is built on GitHub. You never build the card on your Mac and you never attach a
 file to a release by hand.
 
-## Two settings to switch on first
+## Two fork settings (already done)
 
 GitHub does not run workflows on a brand-new fork until the owner says it is fine, and it
-gives a fork no issue tracker. Neither of these is done yet, and until the first one is done
+gives a fork no issue tracker. Both are switched on for this fork, so there is nothing to do
+here. They are kept below in case the repository is ever re-forked: without the first one,
 pushing to `main` runs **nothing** — no error, no red cross, just an empty Actions tab.
 
 1. **Let the workflows run.** Go to
@@ -40,6 +41,10 @@ That is it. The run takes a couple of minutes and does all of this for you:
 
 HACS only ever downloads that attached file (it is named in `hacs.json`), so once the run is
 green, Home Assistant users will be offered the update.
+
+HACS only re-checks a custom repository about every 48 hours, so the update will not show
+straight away. To see it now, open the card in HACS, click the ⋮ menu and choose
+**Update information**; the update then appears and can be downloaded.
 
 If you typed a version that already exists, or the lint/tests/build fail, the run stops and
 **no release is created** — nothing half-finished is published.
